@@ -3,8 +3,8 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/index.module.css";
 
-import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
+import LeftPanel from "./components/LeftPanel";
 
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
@@ -27,11 +27,11 @@ const Home: NextPage = () => {
 
       <Box className={styles.grid}>
         <Box className={styles.left}>
-          <RightPanel />
+          <LeftPanel />
         </Box>
 
         <Box className={styles.right}>
-          <LeftPanel />
+          <RightPanel />
         </Box>
       </Box>
     </Box>
