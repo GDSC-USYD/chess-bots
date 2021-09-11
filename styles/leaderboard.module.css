@@ -1,0 +1,11 @@
+.paper {
+  width: 80%;
+}
+
+.container {
+  max-height: 80vh;
+}
+
+.toolbar {
+  justify-content: center;
+}
