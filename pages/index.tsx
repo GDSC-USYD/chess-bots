@@ -1,13 +1,18 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import styles from "../styles/Home.module.css";
+import styles from "../styles/index.module.css";
+
+import LeftPanel from "./components/LeftPanel";
+import RightPanel from "./components/RightPanel";
 
 import Box from "@material-ui/core/Box";
+import Grid from "@material-ui/core/Grid";
+import Container from "@material-ui/core/Container";
 
 const Home: NextPage = () => {
   return (
-    <div className={styles.container}>
+    <Box className={styles.container}>
       <Head>
         <title>GDSC Chess Bots</title>
         <link
@@ -19,7 +24,17 @@ const Home: NextPage = () => {
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
         />
       </Head>
-    </div>
+
+      <Box className={styles.grid}>
+        <Box className={styles.left}>
+          <RightPanel />
+        </Box>
+
+        <Box className={styles.right}>
+          <LeftPanel />
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
