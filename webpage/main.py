@@ -18,7 +18,7 @@ def hello_world():
     # Extract host and port from db_host
     host_args = db_host.split(":")
     db_hostname, db_port = host_args[0], int(host_args[1])
-    
+
     mydb = mysql.connector.connect(host=db_hostname, port=db_port, user=db_user, password=db_pass, database=db_name)
 
     mycursor = mydb.cursor()
@@ -27,13 +27,13 @@ def hello_world():
 
     myresult = mycursor.fetchall()
 
-    html_string = f"<html><body><h>Hello {name}! Works: {works}<\h>"
+    html_string = f"<html><body><h>Hello {name}! Works: {works}</h>"
 
     for x in myresult:
-      html_string += f"<p>{x}\n<\p>"
+      html_string += f"<p>{x}/n</p>"
 
 
-    html_string += "<\body><\html>"
+    html_string += "</body></html>"
 
     cnx.close()
 
