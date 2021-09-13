@@ -18,10 +18,7 @@ def init_connection_engine():
 
 
 def init_unix_connection_engine(db_config):
-    # [START cloud_sql_mysql_sqlalchemy_create_socket]
-    # Remember - storing secrets in plaintext is potentially unsafe. Consider using
-    # something like https://cloud.google.com/secret-manager/docs/overview to help keep
-    # secrets secret.
+
     db_user = os.environ["DB_USER"]
     db_pass = os.environ["DB_PASS"]
     db_name = os.environ["DB_NAME"]
@@ -42,7 +39,7 @@ def init_unix_connection_engine(db_config):
                     cloud_sql_connection_name)  # i.e "<PROJECT-NAME>:<INSTANCE-REGION>:<INSTANCE-NAME>"
             }
         ),
-        **db_config
+        db_config
     )
 
     return pool
