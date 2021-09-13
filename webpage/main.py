@@ -15,10 +15,11 @@ def hello_world():
     db_host = os.environ["DB_HOST"]
     db_name = os.environ["DB_NAME"]
 
-    cnx = mysql.connector.connect(user=db_user, password=db_pass,
-                                  host=db_host,
-                                  database=db_name)
-
+    # Extract host and port from db_host
+    host_args = db_host.split(":")
+    db_hostname, db_port = host_args[0], int(host_args[1])
+    
+    mydb = mysql.connector.connect(host=db_hostname, port=db_port, user=db_user, password=db_pass, database=db_name)
 
     mycursor = mydb.cursor()
 
