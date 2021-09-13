@@ -26,10 +26,13 @@ def hello_world():
 
     myresult = mycursor.fetchall()
 
-    html_string = f"<h>Hello {name}! Works: {works}</h>"
+    html_string = f"<html><body><h>Hello {name}! Works: {works}</h>"
 
     for x in myresult:
       html_string += f"<\p>{x}\n<\p>"
+
+
+    html_string += "<\body><\html>"
 
     cnx.close()
 
