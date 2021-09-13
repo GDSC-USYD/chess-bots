@@ -10,7 +10,7 @@ def hello_world():
     name = os.environ.get("NAME", "World")
 
     works = False
-    db_user, db_pass, db_name db_host = None
+    db_user, db_pass, db_name, db_host = None
     db_user = os.environ["DB_USER"]
     db_pass = os.environ["DB_PASS"]
     db_name = os.environ["DB_NAME"]
