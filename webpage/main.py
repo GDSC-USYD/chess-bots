@@ -12,7 +12,7 @@ def hello_world():
 
     db_user = os.environ["DB_USER"]
     db_pass = os.environ["DB_PASS"]
-    db_host = os.environ["DB_NAME"]
+    db_host = os.environ["DB_HOST"]
     db_name = os.environ["DB_NAME"]
 
     cnx = mysql.connector.connect(user=db_user, password=db_pass,
