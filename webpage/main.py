@@ -38,8 +38,7 @@ def init_unix_connection_engine(db_config):
                     db_socket_dir,  # e.g. "/cloudsql"
                     cloud_sql_connection_name)  # i.e "<PROJECT-NAME>:<INSTANCE-REGION>:<INSTANCE-NAME>"
             }
-        ),
-        db_config
+        )
     )
 
     return pool
