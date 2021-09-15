@@ -7,7 +7,7 @@
   max-height: 100vh;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  padding: 3rem 0;
+  padding: 1rem 0;
 }
 
 .panel::-webkit-scrollbar {

@@ -1,0 +1,12 @@
+.topbar {
+  display: flex;
+  width: 100%;
+  padding: 1rem 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.header {
+  padding: 0 1rem;
+}
