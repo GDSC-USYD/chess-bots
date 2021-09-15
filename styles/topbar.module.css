@@ -1,7 +1,7 @@
 .topbar {
   display: flex;
   width: 100%;
-  padding: 1rem 0;
+  padding: 0 0 1rem;
   flex-direction: row;
   align-items: center;
   justify-content: center;
