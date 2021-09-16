@@ -1,7 +1,7 @@
 from db_connect import *
 
 from flask import Flask
-import os
+# import os # imported in db_connect
 
 
 app = Flask(__name__)

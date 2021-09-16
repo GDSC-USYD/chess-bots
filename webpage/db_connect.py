@@ -1,5 +1,6 @@
 import sqlalchemy
 import pymysql.cursors
+import os
 
 
 def old_connect_to_db(db_user, db_pass, db_host, db_name):
