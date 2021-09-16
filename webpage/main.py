@@ -1,47 +1,49 @@
-import os
-import mysql.connector
+from db_connect import *
 
 from flask import Flask
+import os
+
 
 app = Flask(__name__)
 
 
-def unix_connect_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name):
 
-    conn = mysql.connector.connect(user=db_user,
-                                password=db_pass,
-                                unix_socket="{}/{}".format(db_socket_dir, cloud_sql_connection_name),
-                                database=db_name)
-
-    return conn
-
-
-
+# returns a html string to display on page
 @app.route("/")
 def hello_world():
     name = os.environ.get("NAME", "World")
-    db_user = os.environ["DB_USER"]
-    db_pass = os.environ["DB_PASS"]
-    db_name = os.environ["DB_NAME"]
-    db_socket_dir = "/cloudsql"
-    cloud_sql_connection_name = os.environ["CLOUD_SQL_CONNECTION_NAME"]
 
-    conn = unix_connect_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name)
+    db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name = get_db_credentials()
 
-    conn.execute( "SELECT * FROM players")
+    db = connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name)
 
-    myresult = conn.fetchall()
+    html_string = "<!DOCTYPE html><html><body>"
 
-    for x in myresult:
-        html_string += f"<p>{x}/n</p>"
+    #conn = unix_connect_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name)
+    with db.connect() as conn:
+        #print("Here")
+        db_players = conn.execute(
+            "SELECT * FROM players "
+        ).fetchall()
+        # Convert the results into a list of dicts representing votes
 
+        #for p in db_players:
+        #    print(p)
+
+        for x in db_players:
+            html_string += f"<p>{x}\n</p>"
+
+        conn.close()
 
     html_string += "</body></html>"
 
-    conn.close()
 
     return html_string
 
 
-if __name__ == "__main__":
+def main():
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
+
+if __name__ == "__main__":
+    main()
