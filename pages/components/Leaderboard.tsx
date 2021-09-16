@@ -25,7 +25,7 @@ const Leaderboard = ({ users }: Props) => {
       </Toolbar>
 
       <TableContainer className={styles.container}>
-        <Table padding="normal" stickyHeader>
+        <Table padding="normal">
           <TableHead>
             <TableRow>
               <TableCell align="center">Name</TableCell>
