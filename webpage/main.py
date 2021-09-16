@@ -7,41 +7,47 @@ from flask import Flask
 app = Flask(__name__)
 
 
-
 # returns a html string to display on page
 @app.route("/")
-def hello_world():
-    #name = os.environ.get("NAME", "World")
+def print_db():
 
-    db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name = get_db_credentials()
+    # connect to db
+    db = connect_to_db()
 
-    db = connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name)
-
+    # create returned html string
     html_string = "<!DOCTYPE html><html><body>"
 
-    #conn = unix_connect_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name)
+    # populate html body with database contents
     with db.connect() as conn:
-        #print("Here")
+
+        html_string += "<h1>Players\n</h1>"
+
         db_players = conn.execute(
             "SELECT * FROM players "
         ).fetchall()
-        # Convert the results into a list of dicts representing votes
-
-        #for p in db_players:
-        #    print(p)
 
         for x in db_players:
             html_string += f"<p>{x}\n</p>"
 
+        html_string += "<h1>Matches\n</h1>"
+
+        db_matches = conn.execute(
+            "SELECT * FROM matches "
+        ).fetchall()
+
+        for x in db_matches:
+            html_string += f"<p>{x}\n</p>"
+
         conn.close()
 
+    # close off returned html string
     html_string += "</body></html>"
-
 
     return html_string
 
 
 def main():
+    #run app
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
 

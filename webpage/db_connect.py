@@ -1,42 +1,15 @@
+# Functions to support connecting to database.
+
 import sqlalchemy
 import pymysql.cursors
 import os
 
 
-def old_connect_to_db(db_user, db_pass, db_host, db_name):
+def tcp_connect_to_db(db_user, db_pass, db_host, db_name):
+    # connects to database over tcp socket
+
     db_host_args = db_host.split(":")
     db_hostname, db_port = db_host_args[0], int(db_host_args[1])
-
-    try:
-
-        conn = pymysql.connect(user=db_user,
-                            password=db_pass,
-                            host=db_hostname,
-                            port=db_port,
-                            database=db_name)
-
-        """
-        conn = mysql.connector.connect(user=db_user,
-                                    password=db_pass,
-                                    host=db_hostname,
-                                    port=db_port,
-                                    database=db_name)
-        """
-
-
-        print("Succeeded")
-
-    except Exception as e:
-        print(e)
-
-    finally:
-        conn.close()
-
-
-def LOCALconnect_to_db(db_user, db_pass, db_host, db_name):
-    db_host_args = db_host.split(":")
-    db_hostname, db_port = db_host_args[0], int(db_host_args[1])
-
 
     pool = sqlalchemy.create_engine(
         # Equivalent URL:
@@ -54,10 +27,8 @@ def LOCALconnect_to_db(db_user, db_pass, db_host, db_name):
     return pool
 
 
-
-def connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name):
-    #db_host_args = db_host.split(":")
-    #db_hostname, db_port = db_host_args[0], int(db_host_args[1])
+def unix_connect_to_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name):
+    # connects to database over unix socket
 
     pool = sqlalchemy.create_engine(
         # Equivalent URL:
@@ -75,11 +46,26 @@ def connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_c
             )
         )
 
-
     return pool
 
 
+def connect_to_db():
+    # returns connection pool to database
+
+    db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name = get_db_credentials()
+
+    #can introduce detector for setting connecting method
+    connect_method = "unix"
+
+    if connect_method == "unix":
+        return unix_connect_to_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name)
+    else: # assume tcp
+        return tcp_connect_to_db(db_user, db_pass, db_host, db_name)
+
+
 def get_db_credentials():
+    #retrieves credentials from environment variables
+
     db_user = os.environ["DB_USER"]
     db_pass = os.environ["DB_PASS"]
     db_host = os.environ["DB_HOST"]
