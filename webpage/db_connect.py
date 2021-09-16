@@ -59,13 +59,6 @@ def connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_c
     #db_host_args = db_host.split(":")
     #db_hostname, db_port = db_host_args[0], int(db_host_args[1])
 
-    """
-    conn = mysql.connector.connect(user=db_user,
-                                password=db_pass,
-                                unix_socket="{}/{}".format(db_socket_dir, cloud_sql_connection_name),
-                                database=db_name)
-    """
-
     pool = sqlalchemy.create_engine(
         # Equivalent URL:
         # mysql+pymysql://<db_user>:<db_pass>@/<db_name>?unix_socket=<socket_path>/<cloud_sql_instance_name>
@@ -75,7 +68,7 @@ def connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_c
             password=db_pass,  # e.g. "my-database-password"
             database=db_name,  # e.g. "my-database-name"
             query={
-                "unix_sock": "{}/{}".format(
+                "unix_socket": "{}/{}".format(
                     db_socket_dir,  # i.e "/cloudsql"
                     cloud_sql_connection_name)  # i.e "<PROJECT-NAME>:<INSTANCE-REGION>:<INSTANCE-NAME>"
                 }
