@@ -47,7 +47,9 @@ def LOCALconnect_to_db(db_user, db_pass, db_host, db_name):
             password=db_pass,
             database=db_name,
             host=db_hostname,
-            port=db_port))
+            port=db_port
+            )
+        )
 
     return pool
 
@@ -72,14 +74,13 @@ def connect_to_db(db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_c
             username=db_user,  # e.g. "my-database-user"
             password=db_pass,  # e.g. "my-database-password"
             database=db_name,  # e.g. "my-database-name"
-            host="127.0.0.1", # specifying so it won't use "localhost"
             query={
-                "unix_socket": "{}/{}".format(
-                    db_socket_dir,  # e.g. "/cloudsql"
+                "unix_sock": "{}/{}".format(
+                    db_socket_dir,  # i.e "/cloudsql"
                     cloud_sql_connection_name)  # i.e "<PROJECT-NAME>:<INSTANCE-REGION>:<INSTANCE-NAME>"
-            }
+                }
+            )
         )
-    )
 
 
     return pool
