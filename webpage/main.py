@@ -1,7 +1,7 @@
 from db_connect import *
 
 from flask import Flask
-import os
+#import os #imported in db_connect
 
 
 app = Flask(__name__)
@@ -11,7 +11,7 @@ app = Flask(__name__)
 # returns a html string to display on page
 @app.route("/")
 def hello_world():
-    name = os.environ.get("NAME", "World")
+    #name = os.environ.get("NAME", "World")
 
     db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name = get_db_credentials()
 
