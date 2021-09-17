@@ -15,11 +15,10 @@ import Paper from "@material-ui/core/Paper";
 interface Props {
   games: Game[];
   users: User[];
+  selectedUser: User["id"] | null;
 }
-// TODO: coloring of table?
-// TODO: highlight yourself automatically
-// TODO: sorting (do we really need this?)
-const GamesTable = ({ games, users }: Props) => {
+
+const GamesTable = ({ games, users, selectedUser }: Props) => {
   return (
     <Paper className={styles.paper}>
       <Toolbar className={styles.toolbar}>
@@ -37,25 +36,37 @@ const GamesTable = ({ games, users }: Props) => {
           </TableHead>
 
           <TableBody>
-            {games.length ? (
-              games.map((g) => (
-                <TableRow hover key={g.timestamp.toString()}>
-                  <TableCell align="center">
-                    {(users.find((u) => u.id === g.player1)?.name ?? "???") +
-                      " vs " +
-                      (users.find((u) => u.id === g.player2)?.name ?? "???")}
-                  </TableCell>
-                  <TableCell align="center">
-                    {users.find((u) => u.id === g.player1)?.name ?? "???"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {g.timestamp.toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))
+            {games.filter(
+              (g) =>
+                selectedUser === null ||
+                g.player1 === selectedUser ||
+                g.player2 === selectedUser
+            ).length ? (
+              games
+                .filter(
+                  (g) =>
+                    selectedUser === null ||
+                    g.player1 === selectedUser ||
+                    g.player2 === selectedUser
+                )
+                .map((g) => (
+                  <TableRow hover key={g.timestamp.toString()}>
+                    <TableCell align="center">
+                      {(users.find((u) => u.id === g.player1)?.name ?? "???") +
+                        " vs " +
+                        (users.find((u) => u.id === g.player2)?.name ?? "???")}
+                    </TableCell>
+                    <TableCell align="center">
+                      {users.find((u) => u.id === g.player1)?.name ?? "???"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {g.timestamp.toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))
             ) : (
               <TableRow>
-                <TableCell colSpan={2} align="center">
+                <TableCell colSpan={3} align="center">
                   <Typography variant="body1">No matches found :(</Typography>
                 </TableCell>
               </TableRow>

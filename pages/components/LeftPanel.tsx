@@ -62,7 +62,7 @@ const LeftPanel = () => {
           selectedUser ? users.find((u) => u.id === selectedUser) : undefined
         }
       />
-      <GamesTable users={users} games={games} />
+      <GamesTable users={users} games={games} selectedUser={selectedUser} />
     </Box>
   );
 };
