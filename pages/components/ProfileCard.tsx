@@ -23,21 +23,23 @@ const ProfileCard = ({ user }: Props) => {
           <div className={styles.details}>
             <Profile name={user.name} />
             <div className={styles.text}>
-              <Typography variant="body1">{user.name}</Typography>
-              <Typography variant="subtitle1">{`MMR: ` + user.mmr}</Typography>
+              <Typography variant="h5">{user.name}</Typography>
+              <Typography variant="subtitle1" style={{ color: "#707070" }}>
+                {`MMR: ` + user.mmr}
+              </Typography>
             </div>
           </div>
         ) : (
           <div className={styles.details}>
             <AccountCircle style={{ marginRight: "1rem" }} />
-            <Typography variant="body1">
+            <Typography variant="subtitle1" style={{ color: "#707070" }}>
               Search a user to view their details
             </Typography>
           </div>
         )}
       </CardContent>
       <CardActions className={styles.action}>
-        <Button>
+        <Button disabled={!user}>
           Play against this player <ChevronRightIcon />
         </Button>
       </CardActions>

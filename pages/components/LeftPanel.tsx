@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import Box from "@material-ui/core/Box";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Typography from "@material-ui/core/Typography";
 
 const users = [
   { id: 123, mmr: 1000, name: "Asdfsa" },
@@ -42,6 +43,9 @@ const LeftPanel = () => {
       <ExpandMoreIcon
         style={{ fontSize: "3rem", margin: "1rem 0 5rem", color: "#707070" }}
       />
+      <Typography variant="h3" style={{ paddingBottom: "3rem" }}>
+        Player and Game Details
+      </Typography>
       <SearchBar users={users} setSelectedUser={setSelectedUser} />
       <ProfileCard
         user={

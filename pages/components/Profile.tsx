@@ -33,10 +33,10 @@ const Profile = ({ name }: Props) => {
       },
       children: `${
         name.includes(" ")
-          ? name.split(" ")[0][0] + name.split(" ")[1][0]
+          ? (name.split(" ")[0][0] + name.split(" ")[1][0]).toUpperCase()
           : name.length >= 2
-          ? name[0] + name[1]
-          : name[0]
+          ? (name[0] + name[1]).toUpperCase()
+          : name[0].toUpperCase()
       }`,
     };
   };
