@@ -8,7 +8,7 @@ const TopBar = () => {
   return (
     <Box className={styles.topbar}>
       <Image src="/logo.png" width="88" height="71" />
-      <Typography variant="h3" className={styles.header}>
+      <Typography variant="h4" className={styles.header}>
         University of Sydney Chess Bots Competition
       </Typography>
     </Box>

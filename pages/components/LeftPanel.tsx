@@ -8,6 +8,7 @@ import styles from "../../styles/left-panel.module.css";
 import { useState } from "react";
 
 import Box from "@material-ui/core/Box";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const users = [
   { id: 123, mmr: 1000, name: "Asdfsa" },
@@ -38,6 +39,9 @@ const LeftPanel = () => {
     <Box className={styles.panel}>
       <TopBar />
       <Leaderboard users={users} />
+      <ExpandMoreIcon
+        style={{ fontSize: "3rem", margin: "1rem 0 5rem", color: "#707070" }}
+      />
       <SearchBar users={users} setSelectedUser={setSelectedUser} />
       <ProfileCard
         user={
