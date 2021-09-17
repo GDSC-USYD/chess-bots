@@ -1,6 +1,7 @@
 import Leaderboard from "./Leaderboard";
 import TopBar from "./TopBar";
 import SearchBar from "./SearchBar";
+import ProfileCard from "./ProfileCard";
 import { User } from "../types/UserTypes";
 import styles from "../../styles/left-panel.module.css";
 
@@ -37,9 +38,12 @@ const LeftPanel = () => {
     <Box className={styles.panel}>
       <TopBar />
       <Leaderboard users={users} />
-      <div style={{ padding: "5rem 0" }}></div>
       <SearchBar users={users} setSelectedUser={setSelectedUser} />
-      <div style={{ padding: "5rem 0" }}></div>
+      <ProfileCard
+        user={
+          selectedUser ? users.find((u) => u.id === selectedUser) : undefined
+        }
+      />
     </Box>
   );
 };
