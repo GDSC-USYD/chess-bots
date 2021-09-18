@@ -30,15 +30,16 @@ const SearchBar = ({ users, setSelectedUser }: Props) => {
 
   return (
     <>
-      <Paper component="form" className={styles.root}>
-        <>
+      <Paper className={styles.root}>
+        <div className={styles.left}>
           <PersonOutlineIcon className={styles.person} />
           <InputBase
             placeholder="Search and filter by a User"
             ref={anchorRef}
             onChange={(e) => setSearch(e.target.value)}
+            style={{ width: "100%" }}
           />
-        </>
+        </div>
         <IconButton disabled>
           <SearchIcon />
         </IconButton>
