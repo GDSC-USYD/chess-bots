@@ -52,12 +52,9 @@ def unix_connect_to_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_conne
 def connect_to_db():
     # returns connection pool to database
 
-    db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name = get_db_credentials()
+    db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name, db_conn_method = get_db_credentials()
 
-    #can introduce detector for setting connecting method
-    connect_method = "unix"
-
-    if connect_method == "unix":
+    if db_conn_method == "unix":
         return unix_connect_to_db(db_user, db_pass, db_name, db_socket_dir, cloud_sql_connection_name)
     else: # assume tcp
         return tcp_connect_to_db(db_user, db_pass, db_host, db_name)
@@ -72,5 +69,6 @@ def get_db_credentials():
     db_name = os.environ["DB_NAME"]
     db_socket_dir = "/cloudsql"
     cloud_sql_connection_name = os.environ["CLOUD_SQL_CONNECTION_NAME"]
+    db_conn_method = os.environ.get("DB_CONN_METHOD", "unix")
 
-    return db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name
+    return db_user, db_pass, db_host, db_name, db_socket_dir, cloud_sql_connection_name, db_conn_method
