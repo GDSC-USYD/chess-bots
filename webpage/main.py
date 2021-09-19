@@ -1,7 +1,7 @@
 from db_connect import *
 from game_master import *
 from db_access import *
-
+#from send_email import * # email function added soon
 
 
 from flask import Flask, jsonify, make_response, redirect, url_for, request
@@ -12,18 +12,25 @@ from flask import Flask, jsonify, make_response, redirect, url_for, request
 app = Flask(__name__)
 
 
+
 #NOT FINISHED
+def send_reminder_email(email, password):
+    #sends an email to the specified email
+    pass
+
+
+
 @app.route('/forgotpass', methods=["POST"]) # POST
 def player_reset_password():
     # sends email to given email address to regain password
     # recieves form dict ->
     # {"name":name, "email", email}
 
-
     data_dict = request.form.to_dict()
 
     print(data_dict)
 
+    # try import and validate given values
     try:
         name = data_dict["name"]
         email = data_dict["email"]
@@ -44,13 +51,20 @@ def player_reset_password():
         status_code = 400
         return make_response(jsonify(data), status_code)
 
-    # passed initial check
+    # passed initial check, try retrieve from db
+    # retrieve player data
+    db_player = db_retrieve_entry_data(conn, "players", "name", name)
 
+    if db_player != None:
+        #extract password
+        password = db_player[5]
 
-    # do something
+        # send reminder email
+        send_reminder_email(email, password)
+        db_check_message = "OK"
 
-
-    db_check_message = "Not Implemented Yet"
+    else:
+        db_check_message = "Could not find player."
 
     # if found + OK
     if db_check_message == "OK":
@@ -63,7 +77,7 @@ def player_reset_password():
     return make_response(jsonify(data), status_code)
 
 
-#NOT FINISHED
+
 @app.route('/login', methods=["POST"]) # POST
 def player_login():
     # accepts or refuses player login request into db
@@ -74,6 +88,7 @@ def player_login():
 
     print(data_dict)
 
+    # try import and validate given values
     try:
         name = data_dict["name"]
         password = data_dict["password"]
@@ -94,7 +109,7 @@ def player_login():
         status_code = 400
         return make_response(jsonify(data), status_code)
 
-    # passed initial check
+    # passed initial check, try search in db
     db = connect_to_db()
     with db.connect() as conn:
         db_check_message = db_confirm_player_credentials(conn, table_name, name, password)
@@ -111,9 +126,10 @@ def player_login():
     return make_response(jsonify(data), status_code)
 
 
+
 #NOT FINISHED
 @app.route('/register', methods=["POST"]) # POST
-def new_player():
+def register_new_player():
     # inserts new player into db
     # recieves form dict ->
     # {"name":name, "password":password, "email", email}
@@ -122,10 +138,11 @@ def new_player():
 
     print(data_dict)
 
+    # try import and validate given values
     try:
         table_name = "players"
-        name = data_dict["name"]
-        password = data_dict["password"]
+        name = data_dict["name"].replace("\'", "‘") #change single quotes
+        password = data_dict["password"].replace("\'", "‘") #change single quotes
         email = data_dict["email"]
         credentials_message = "OK"
 
@@ -133,20 +150,25 @@ def new_player():
             raise Exception(password, "Password is too short.")
         elif len(name) < 1:
             raise Exception(name, "Name is too short.")
+        elif check_valid_email(email) == False:
+            raise Exception(email, "Email is invalid.")
 
     except Exception as e:
         if len(e.args) > 0:
             credentials_message = f"Error with value: {e.args[0]}. {e.args[1]}"
         else:
             credentials_message = e
-        data = {'message': 'Error', 'code': 'FAIL', "payload": str(db_upload_message)}
+        data = {'message': 'Error', 'code': 'FAIL', "payload": str(credentials_message)}
         status_code = 400
         return make_response(jsonify(data), status_code)
 
-    # passed initial check
+    # passed initial check, try upload to db
     db = connect_to_db()
     with db.connect() as conn:
-        db_upload_message = db_insert_new_player(conn, table_name, name, password, email)
+        if db_retrieve_entry_data(conn, table_name, "name", name) is not None:
+            db_upload_message = "Name is already taken."
+        else:
+            db_upload_message = db_insert_new_player(conn, table_name, name, password, email)
         conn.close()
 
     # if created + OK
@@ -391,6 +413,8 @@ def print_db():
         for x in db_describe_matches:
             html_string += f"<p>{x}\n</p>"
 
+        batch_id = db_latest_batch_id(conn)
+        html_string += f"<p>Latest Batch ID: {batch_id}\n</p>"
         conn.close()
 
     # close off returned html string
@@ -405,9 +429,11 @@ def home():
     return redirect("database")
 
 
+
 def main():
     #run app
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
 
 
 if __name__ == "__main__":
