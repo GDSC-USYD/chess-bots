@@ -21,9 +21,9 @@ const ProfileCard = ({ user }: Props) => {
       <CardContent>
         {user ? (
           <div className={styles.details}>
-            <Profile name={user.name} />
+            <Profile name={user.username} />
             <div className={styles.text}>
-              <Typography variant="h5">{user.name}</Typography>
+              <Typography variant="h5">{user.username}</Typography>
               <Typography variant="subtitle1" style={{ color: "#707070" }}>
                 {`MMR: ` + user.mmr}
               </Typography>

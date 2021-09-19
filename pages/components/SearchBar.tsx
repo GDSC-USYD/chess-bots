@@ -52,7 +52,7 @@ const SearchBar = ({ users, setSelectedUser }: Props) => {
                 <MenuList>
                   {users
                     .filter((u) =>
-                      u.name.toLowerCase().includes(search.toLowerCase())
+                      u.username.toLowerCase().includes(search.toLowerCase())
                     )
                     .map((u) => (
                       <MenuItem
@@ -62,7 +62,7 @@ const SearchBar = ({ users, setSelectedUser }: Props) => {
                           setOpen(false);
                         }}
                       >
-                        {u.name}
+                        {u.username}
                       </MenuItem>
                     ))}
                 </MenuList>
