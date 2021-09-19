@@ -57,7 +57,7 @@ def player_reset_password():
 
     if db_player != None:
         #extract password
-        password = db_player[5]
+        password = db_player[6]
 
         # send reminder email
         send_reminder_email(email, password)
