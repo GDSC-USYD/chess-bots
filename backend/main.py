@@ -267,8 +267,12 @@ def return_players():
     db = connect_to_db()
 
     with db.connect() as conn:
-        db_players = db_retrieve_table_list(conn, "players").pop("password")
+        db_players = db_retrieve_table_list(conn, "players")
         conn.close()
+
+    # remove password key:value pair
+    for player_dict in db_players:
+        del player_dict["password"]
 
     # if found
     if db_players != None:
