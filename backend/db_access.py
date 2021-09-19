@@ -76,11 +76,17 @@ def db_insert_new_player(conn, table_name, name, password, email):
         #conn.begin()
         conn.execute(f"INSERT INTO {table_name} (name, status_flag, password, email) VALUES ('{name}', {status_flag}, '{password}', '{email}');")
         #conn.commit()
-        return db_upload_message
+
+        # check now in database and retrieve player_id
+        db_upload_message, player_id = db_confirm_player_credentials(conn, table_name, name, password)
+
+        return db_upload_message, player_id
+
     except Exception as e:
+        player_id = None
         print(e)
         db_upload_message = e
-        return db_upload_message
+        return db_upload_message, player_id
 
 
 
@@ -89,16 +95,17 @@ def db_confirm_player_credentials(conn, table_name, name, password):
     # returns db_upload_message string -> status of db update
     db_check_message = "OK"
 
-    db_entry = conn.execute(
-        f"SELECT * FROM {table_name} WHERE name = '{name}' AND password = '{password}'"
-    ).fetchall()
+    db_player_id = conn.execute(
+        f"SELECT player_id FROM {table_name} WHERE name = '{name}' AND password = '{password}'"
+    ).fetchone()
 
-
-    if len(db_entry) > 1: #empty list if not found
-        return db_check_message
+    if db_player_id != None: #None if not found
+        player_id = db_player_id[0]
+        return db_check_message, player_id
     else: # not found
         db_check_message = "Player not found."
-        return db_check_message
+        player_id = None
+        return db_check_message, player_id
 
 
 

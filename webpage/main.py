@@ -1,6 +1,7 @@
 from db_connect import *
 #from game_master import *
 from db_access import *
+from jwt_secure import *
 #from send_email import * # email function added soon
 
 
@@ -84,6 +85,7 @@ def player_login():
     # recieves form dict ->
     # {"name":name, "password":password}
 
+    # read form data
     data_dict = request.form.to_dict()
 
     print(data_dict)
@@ -112,18 +114,25 @@ def player_login():
     # passed initial check, try search in db
     db = connect_to_db()
     with db.connect() as conn:
-        db_check_message = db_confirm_player_credentials(conn, table_name, name, password)
+        db_check_message, player_id = db_confirm_player_credentials(conn, table_name, name, password)
         conn.close()
 
     # if found + OK
     if db_check_message == "OK":
+
+        # create JWT for header
+        auth_token = encode_auth_token(player_id)
         data = {'message': 'Approved', 'code': 'SUCCESS', "payload": db_check_message}
         status_code = 201
     else: #if error
+        auth_token = None
         data = {'message': 'Denied', 'code': 'FAIL', "payload": str(db_check_message)}
         status_code = 400
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    response.headers["Authorisation"] = auth_token
+    return response
 
 
 
@@ -167,18 +176,27 @@ def register_new_player():
         if db_retrieve_entry_data(conn, table_name, "name", name) is not None:
             db_upload_message = "Name is already taken."
         else:
-            db_upload_message = db_insert_new_player(conn, table_name, name, password, email)
+            db_upload_message, player_id = db_insert_new_player(conn, table_name, name, password, email)
         conn.close()
 
     # if created + OK
     if db_upload_message == "OK":
+
+        # create JWT for header
+        auth_token = encode_auth_token(player_id)
+
         data = {'message': 'Created', 'code': 'SUCCESS', "payload": db_upload_message}
         status_code = 201
     else: #if error
+
+        auth_token = None
         data = {'message': 'Error', 'code': 'FAIL', "payload": str(db_upload_message)}
         status_code = 400
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    response.headers["Authorisation"] = auth_token
+    return response
 
 
 
@@ -206,7 +224,9 @@ def return_model_url(player_id):
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": model_url}
         status_code = 404
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
@@ -234,7 +254,9 @@ def return_pgn(match_id):
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": None}
         status_code = 404
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
@@ -256,7 +278,9 @@ def return_matches():
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": None}
         status_code = 404
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
@@ -282,7 +306,9 @@ def return_players():
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": None}
         status_code = 404
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
@@ -310,7 +336,9 @@ def return_elo():
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": None}
         status_code = 404
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
@@ -327,8 +355,10 @@ def launch_chess_game_master():
 
     # assume AOK
     data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
-    return make_response(jsonify(data), 201)
-
+    status_code = 201
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
     # keeping second option in case above fails
     #resp = jsonify(success=True)
     #return resp
@@ -351,9 +381,19 @@ def update_entry():
     # try import and validate given values
     try:
         table_name = data_dict["table_name"]
-        id_value = data_dict["id_value"]
+        id_value = int(data_dict["id_value"])
         var_name = data_dict["var_name"]
         var_value = data_dict["var_value"].replace("\'", "‘") #change single quotes
+        auth_token = request.headers.get("Authorisation")
+
+        # check that JWT authorisation token is valid, returns player_id or error
+        auth_return = decode_auth_token(auth_token)
+
+        if auth_return != id_value:
+            if isinstance(auth_return, int):
+                raise Exception(id_value, "Authorisation token refused: Wrong player token.")
+            else:
+                raise Exception(id_value, "Authorisation token refused: " + str(auth_return))
 
         # only accept variable changes to model_url
         if var_name != "model_url":
@@ -366,23 +406,30 @@ def update_entry():
         elif var_name == "email" and check_valid_email(var_value) == False:
             raise Exception(email, "Email is invalid.")
 
+        #check table to see entry id kind
+        if table_name == "players":
+            id_name = "player_id"
+        elif table_name == "matches":
+            id_name = "match_id"
+        else:
+            raise Exception(table_name, "Invalid table name.")
+
+
     except Exception as e:
         if len(e.args) > 0:
             credentials_message = f"Error with value: {e.args[0]}. {e.args[1]}"
         else:
             credentials_message = e
+
         data = {'message': 'Error', 'code': 'FAIL', "payload": str(credentials_message)}
         status_code = 400
-        return make_response(jsonify(data), status_code)
+        response = make_response(jsonify(data), status_code)
+        response.headers["Content-Type"] = "application/json"
+        return response
 
     # passed initial check, try update in db
     db = connect_to_db()
     with db.connect() as conn:
-
-        if table_name == "players":
-            id_name = "player_id"
-        elif table_name == "matches":
-            id_name = "match_id"
 
         db_upload_message = db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value)
         conn.close()
@@ -395,7 +442,9 @@ def update_entry():
         data = {'message': 'Error', 'code': 'FAIL', "payload": str(db_upload_message)}
         status_code = 404
 
-    return make_response(jsonify(data), status_code)
+    response = make_response(jsonify(data), status_code)
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 
