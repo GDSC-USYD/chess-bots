@@ -52,12 +52,14 @@ const GamesTable = ({ games, users, selectedUser }: Props) => {
                 .map((g) => (
                   <TableRow hover key={g.timestamp.toString()}>
                     <TableCell align="center">
-                      {(users.find((u) => u.id === g.player1)?.name ?? "???") +
+                      {(users.find((u) => u.id === g.player1)?.username ??
+                        "???") +
                         " vs " +
-                        (users.find((u) => u.id === g.player2)?.name ?? "???")}
+                        (users.find((u) => u.id === g.player2)?.username ??
+                          "???")}
                     </TableCell>
                     <TableCell align="center">
-                      {users.find((u) => u.id === g.player1)?.name ?? "???"}
+                      {users.find((u) => u.id === g.player1)?.username ?? "???"}
                     </TableCell>
                     <TableCell align="center">
                       {g.timestamp.toLocaleString()}

@@ -37,7 +37,7 @@ const Leaderboard = ({ users }: Props) => {
             {users.length ? (
               users.map((u) => (
                 <TableRow hover key={u.id}>
-                  <TableCell align="center">{u.name}</TableCell>
+                  <TableCell align="center">{u.username}</TableCell>
                   <TableCell align="center">{u.mmr}</TableCell>
                 </TableRow>
               ))
