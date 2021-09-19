@@ -1,5 +1,5 @@
 from db_connect import *
-from game_master import *
+#from game_master import *
 from db_access import *
 #from send_email import * # email function added soon
 
@@ -32,8 +32,8 @@ def player_reset_password():
 
     # try import and validate given values
     try:
-        name = data_dict["name"]
-        email = data_dict["email"]
+        name = data_dict["name"].replace("\'", "‘") #change single quotes
+        email = data_dict["email"].replace("\'", "‘")
         table_name = "players"
         credentials_message = "OK"
 
@@ -90,8 +90,8 @@ def player_login():
 
     # try import and validate given values
     try:
-        name = data_dict["name"]
-        password = data_dict["password"]
+        name = data_dict["name"].replace("\'", "‘") #change single quotes
+        password = data_dict["password"].replace("\'", "‘") #change single quotes
         table_name = "players"
         credentials_message = "OK"
 
@@ -127,7 +127,6 @@ def player_login():
 
 
 
-#NOT FINISHED
 @app.route('/register', methods=["POST"]) # POST
 def register_new_player():
     # inserts new player into db
@@ -142,8 +141,8 @@ def register_new_player():
     try:
         table_name = "players"
         name = data_dict["name"].replace("\'", "‘") #change single quotes
-        password = data_dict["password"].replace("\'", "‘") #change single quotes
-        email = data_dict["email"]
+        password = data_dict["password"].replace("\'", "‘")
+        email = data_dict["email"].replace("\'", "‘")
         credentials_message = "OK"
 
         if len(password) < 8:
@@ -202,7 +201,7 @@ def return_model_url(player_id):
     # if found
     if model_url != None:
         data = {'message': 'Found', 'code': 'SUCCESS', "payload": model_url}
-        status_code = 201
+        status_code = 200
     else:
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": model_url}
         status_code = 404
@@ -230,7 +229,7 @@ def return_pgn(match_id):
     # if found
     if pgn != None:
         data = {'message': 'Found', 'code': 'SUCCESS', "payload": pgn}
-        status_code = 201
+        status_code = 200
     else:
         data = {'message': 'Unfound', 'code': 'FAIL', "payload": None}
         status_code = 404
@@ -242,11 +241,11 @@ def return_pgn(match_id):
 @app.route("/matches", methods=["GET"]) # GET
 def return_matches():
     # returns the dict of matches with
-    # return [key:value,...] -> {match_id:[...,match data,...],...}
+    # returns -> [{...match key value pairs...},...]
     db = connect_to_db()
 
     with db.connect() as conn:
-        db_matches = db_retrieve_table_dict(conn, "matches")
+        db_matches = db_retrieve_table_list(conn, "matches")
         conn.close()
 
     # if found
@@ -263,12 +262,12 @@ def return_matches():
 
 @app.route("/players", methods=["GET"]) # GET
 def return_players():
-    # returns the dict of players with
-    # return [key:value,...] -> {player_id:[...,match data,...],...}
+    # returns the list of dictionaries with player data
+    # returns -> [{...player key value pairs...},...]
     db = connect_to_db()
 
     with db.connect() as conn:
-        db_players = db_retrieve_table_dict(conn, "players")
+        db_players = db_retrieve_table_list(conn, "players").pop("password")
         conn.close()
 
     # if found
@@ -285,16 +284,19 @@ def return_players():
 
 @app.route("/elo", methods=["GET"]) # GET
 def return_elo():
-    # returns a shortened dict of players with
-    # return [key:value,...] -> {player_id:[name,elo_score],...}
+    # returns a list of of shortened player dictionaries
+    # returns -> [{"player_id":player_id, "name":name, "elo_score":elo_score},...]
     db = connect_to_db()
 
     with db.connect() as conn:
-        db_players = db_retrieve_table_dict(conn, "players")
+        db_players = db_retrieve_table_list(conn, "players")
         conn.close()
 
-    for player_id in db_players:
-        db_players[player_id] = db_players[player_id][0:2] # just keep name and elo_score
+    # remove unnecessary key:value pairs
+    to_remove = ["model_url", "status_flag", "email", "password"]
+    for player_dict in db_players:
+        for key in to_remove:
+            del player_dict[key] # just keep player_id, name and elo_score
 
     # if found
     if db_players != None:
@@ -313,15 +315,14 @@ def return_elo():
 def launch_chess_game_master():
     # create chess game master and run games in another thread
 
-    #db = connect_to_db()
-    #with db.connect() as conn:
-    #    chess_game_master = ChessGameMaster()
-    #    threading.Thread(target=chess_game_master.run, args=(conn,)).start()
+    db = connect_to_db()
+    with db.connect() as conn:
+        chess_game_master = ChessGameMaster(conn)
+        threading.Thread(target=chess_game_master.run).start()
 
-    #chess_game_master.run()
 
     # assume AOK
-    data = {'message': 'Launched', 'code': 'SUCCESS'}
+    data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
     return make_response(jsonify(data), 201)
 
     # keeping second option in case above fails
@@ -343,11 +344,34 @@ def update_entry():
 
     print(data_dict)
 
-    table_name = data_dict["table_name"]
-    id_value = data_dict["id_value"]
-    var_name = data_dict["var_name"]
-    var_value = data_dict["var_value"]
+    # try import and validate given values
+    try:
+        table_name = data_dict["table_name"]
+        id_value = data_dict["id_value"]
+        var_name = data_dict["var_name"]
+        var_value = data_dict["var_value"].replace("\'", "‘") #change single quotes
 
+        # only accept variable changes to model_url
+        if var_name != "model_url":
+            raise Exception(var_name, "Can only update model_url variable.")
+
+        if var_name == "password" and len(var_value) < 8:
+            raise Exception(var_value, "Password is too short.")
+        elif var_name == "name" and len(var_value) < 1:
+            raise Exception(var_value, "Name is too short.")
+        elif var_name == "email" and check_valid_email(var_value) == False:
+            raise Exception(email, "Email is invalid.")
+
+    except Exception as e:
+        if len(e.args) > 0:
+            credentials_message = f"Error with value: {e.args[0]}. {e.args[1]}"
+        else:
+            credentials_message = e
+        data = {'message': 'Error', 'code': 'FAIL', "payload": str(credentials_message)}
+        status_code = 400
+        return make_response(jsonify(data), status_code)
+
+    # passed initial check, try update in db
     db = connect_to_db()
     with db.connect() as conn:
 
@@ -357,8 +381,7 @@ def update_entry():
             id_name = "match_id"
 
         db_upload_message = db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value)
-
-    conn.close()
+        conn.close()
 
     # if found
     if db_upload_message == "OK":
@@ -387,6 +410,7 @@ def print_db():
 
         # show entries of database tables
         db_players = db_retrieve_table_data(conn, "players")
+        db_players = (x[:-1] for x in db_players) # removes last password coloumn
 
         html_string += "<h1>Players\n</h1>"
 
