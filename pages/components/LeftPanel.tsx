@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import ProfileCard from "./ProfileCard";
 import { User } from "../types/UserTypes";
 import { Game } from "../types/GameTypes";
+import GamesTable from "./GamesTable";
 import styles from "../../styles/left-panel.module.css";
 
 import { useState } from "react";
@@ -11,7 +12,6 @@ import { useState } from "react";
 import Box from "@material-ui/core/Box";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
-import GamesTable from "./GamesTable";
 
 const users = [
   { id: 123, mmr: 1000, name: "Asdfsa" },
@@ -63,6 +63,24 @@ const LeftPanel = () => {
         }
       />
       <GamesTable users={users} games={games} selectedUser={selectedUser} />
+      <Box>
+        <Typography
+          variant="h3"
+          style={{ paddingTop: "3rem", color: "#707070" }}
+        >
+          Instructions
+        </Typography>
+        Insert some instructions here
+      </Box>
+      <Box>
+        <Typography
+          variant="h3"
+          style={{ paddingTop: "3rem", color: "#707070" }}
+        >
+          FAQs
+        </Typography>
+        Insert some FAQs here
+      </Box>
     </Box>
   );
 };
