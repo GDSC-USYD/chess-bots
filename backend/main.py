@@ -122,7 +122,8 @@ def player_login():
 
         # create JWT for header
         auth_token = encode_auth_token(player_id)
-        data = {'message': 'Approved', 'code': 'SUCCESS', "payload": db_check_message}
+        
+        data = {'message': 'Approved', 'code': 'SUCCESS', "payload": auth_token}
         status_code = 201
     else: #if error
         auth_token = None
@@ -131,7 +132,6 @@ def player_login():
 
     response = make_response(jsonify(data), status_code)
     response.headers["Content-Type"] = "application/json"
-    response.headers["Authorisation"] = auth_token
     return response
 
 
@@ -185,7 +185,7 @@ def register_new_player():
         # create JWT for header
         auth_token = encode_auth_token(player_id)
 
-        data = {'message': 'Created', 'code': 'SUCCESS', "payload": db_upload_message}
+        data = {'message': 'Created', 'code': 'SUCCESS', "payload": auth_token}
         status_code = 201
     else: #if error
 
