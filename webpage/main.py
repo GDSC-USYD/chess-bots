@@ -6,12 +6,13 @@ from jwt_secure import *
 
 
 from flask import Flask, jsonify, make_response, redirect, url_for, request
+from flask_cors import CORS
 # import os # imported in db_connect
 
 
 
 app = Flask(__name__)
-
+CORS(app) # enable CORS on all domains
 
 
 #NOT FINISHED
@@ -122,7 +123,7 @@ def player_login():
 
         # create JWT for header
         auth_token = encode_auth_token(player_id)
-        
+
         data = {'message': 'Approved', 'code': 'SUCCESS', "payload": auth_token}
         status_code = 201
     else: #if error

@@ -6,3 +6,4 @@ requests==2.26.0
 chess==1.6.1
 tensorflow==2.6.0
 pyjwt==2.1.0
+flask-cors==3.0.10
