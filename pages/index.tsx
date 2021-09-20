@@ -2,15 +2,26 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/index.module.css";
+import { User } from "./types/UserTypes";
+import { useState, useEffect } from "react";
 
 import RightPanel from "./components/RightPanel";
 import LeftPanel from "./components/LeftPanel";
 
 import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Container from "@material-ui/core/Container";
+import { getUsers } from "./api/routes";
 
 const Home: NextPage = () => {
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const populate = async () => {
+      setUsers(await getUsers());
+    };
+
+    populate();
+  }, []);
+
   return (
     <Box className={styles.container}>
       <Head>
@@ -27,7 +38,7 @@ const Home: NextPage = () => {
 
       <Box className={styles.grid}>
         <Box className={styles.left}>
-          <LeftPanel />
+          <LeftPanel users={users} />
         </Box>
 
         <Box className={styles.right}>
