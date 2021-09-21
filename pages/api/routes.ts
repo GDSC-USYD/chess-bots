@@ -20,13 +20,19 @@ function CheckFields<T>(obj: any, fields: (keyof T)[]): T {
 
 export const getUsers = async (): Promise<User[]> => {
   try {
-    const res = CheckFields<ApiEloResponse>(await api.get("/elo"), [
+    const res = CheckFields<ApiEloResponse>((await api.get("/elo")).data, [
       "code",
       "message",
       "payload",
     ]);
 
-    return res.payload;
+    return res.payload.map((u) => {
+      return {
+        id: u.player_id ?? 0,
+        username: u.name ?? "",
+        mmr: u.elo_score ?? 0,
+      };
+    });
   } catch (err) {
     console.log(err);
     return [];
@@ -41,7 +47,7 @@ export const createUser = async (data: RegisterDto): Promise<string> => {
     formData.append("email", data.email);
 
     const res = CheckFields<ApiAuthResponse>(
-      await api.post("/register", formData),
+      (await api.post("/register", formData)).data,
       ["code", "message", "payload"]
     );
 
@@ -59,7 +65,7 @@ export const loginUser = async (data: LoginDto): Promise<string> => {
     formData.append("password", data.password);
 
     const res = CheckFields<ApiAuthResponse>(
-      await api.post("/login", formData),
+      (await api.post("/login", formData)).data,
       ["code", "message", "payload"]
     );
 

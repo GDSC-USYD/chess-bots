@@ -1,17 +1,32 @@
 import styles from "../../styles/rightpanel.module.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Box from "@material-ui/core/Box";
 import Login from "./Login";
 import Typography from "@material-ui/core/Typography";
+import { AlertItem } from "../types/UtilityTypes";
 
-const RightPanel = () => {
+interface Props {
+  setAlertMessage: (alertItem: AlertItem) => void;
+}
+
+const RightPanel = ({ setAlertMessage }: Props) => {
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLoggedIn(localStorage.getItem("token") !== null);
+  }, []);
+
   return (
     <Box className={styles.root}>
       <Typography variant="h4" className={styles.title}>
         User Area
       </Typography>
-      <Login />
+      {loggedIn ? (
+        <div></div>
+      ) : (
+        <Login setLoggedIn={setLoggedIn} setAlertMessage={setAlertMessage} />
+      )}
     </Box>
   );
 };

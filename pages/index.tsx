@@ -4,15 +4,19 @@ import Image from "next/image";
 import styles from "../styles/index.module.css";
 import { User } from "./types/UserTypes";
 import { useState, useEffect } from "react";
+import { getUsers } from "./api/routes";
+import { AlertItem } from "./types/UtilityTypes";
 
 import RightPanel from "./components/RightPanel";
 import LeftPanel from "./components/LeftPanel";
 
 import Box from "@material-ui/core/Box";
-import { getUsers } from "./api/routes";
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
 
 const Home: NextPage = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [alertMessage, setAlertMessage] = useState<AlertItem | null>(null);
 
   useEffect(() => {
     const populate = async () => {
@@ -42,9 +46,23 @@ const Home: NextPage = () => {
         </Box>
 
         <Box className={styles.right}>
-          <RightPanel />
+          <RightPanel setAlertMessage={setAlertMessage} />
         </Box>
       </Box>
+      {!!alertMessage && (
+        <Snackbar
+          open={!!alertMessage}
+          autoHideDuration={6000}
+          onClose={() => setAlertMessage(null)}
+        >
+          <Alert
+            onClose={() => setAlertMessage(null)}
+            severity={alertMessage.color}
+          >
+            {alertMessage.message}
+          </Alert>
+        </Snackbar>
+      )}
     </Box>
   );
 };

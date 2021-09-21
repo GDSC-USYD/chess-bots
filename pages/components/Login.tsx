@@ -1,26 +1,32 @@
 import styles from "../../styles/rightpanel.module.css";
 import React, { useState, useEffect } from "react";
+import { createUser, loginUser } from "../api/routes";
 
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
 import Alert from "@material-ui/lab/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
+import { Color } from "@material-ui/lab/Alert";
 
 type Input = { value: string; error?: string };
+type AlertItem = { color: Color; message: string };
+
 enum Screen {
   LOGIN,
   SIGNUP,
   FORGOT,
 }
 
-const Login = () => {
+interface Props {
+  setLoggedIn: (loggedIn: boolean) => void;
+  setAlertMessage: (alertItem: AlertItem) => void;
+}
+
+const Login = ({ setLoggedIn, setAlertMessage }: Props) => {
   const [email, setEmail] = useState<Input>({ value: "" });
   const [password, setPassword] = useState<Input>({ value: "" });
   const [username, setUsername] = useState<Input>({ value: "" });
-
-  const [alert, setAlert] = useState<boolean>(false);
-  const [alertMessage, setAlertMessage] = useState<string>("");
 
   const [screen, setScreen] = useState<Screen>(Screen.LOGIN);
 
@@ -30,12 +36,12 @@ const Login = () => {
     setUsername({ value: "" });
   }, [screen]);
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const login = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!email.value)
-      setEmail((email) => {
-        return { ...email, error: "Please enter an email address" };
+    if (!username.value)
+      setUsername((username) => {
+        return { ...username, error: "Please enter an email address" };
       });
 
     if (!password.value)
@@ -43,8 +49,27 @@ const Login = () => {
         return { ...password, error: "Please enter a password" };
       });
 
-    if (password.value && email.value) {
-      setEmail({ value: "" });
+    if (password.value && username.value) {
+      const res = await loginUser({
+        username: username.value,
+        password: password.value,
+      });
+
+      if (res) {
+        localStorage.setItem("token", res);
+        setAlertMessage({
+          color: "success",
+          message: "Succesfully logged in!",
+        });
+        setLoggedIn(true);
+      } else {
+        setAlertMessage({
+          color: "error",
+          message: "Incorrect username and password combination :(",
+        });
+      }
+
+      setUsername({ value: "" });
       setPassword({ value: "" });
     }
   };
@@ -68,14 +93,30 @@ const Login = () => {
       });
 
     if (password.value && email.value && username.value) {
+      const res = await createUser({
+        username: username.value,
+        email: email.value,
+        password: password.value,
+      });
+      if (res) {
+        localStorage.setItem("token", res);
+        setAlertMessage({
+          color: "success",
+          message:
+            "Succesfully registered! Check your email for a confirmation message",
+        });
+        setLoggedIn(true);
+      } else {
+        setAlertMessage({
+          color: "error",
+          message:
+            "Something went wrong during registration (oops!). Please try again",
+        });
+      }
+
       setEmail({ value: "" });
       setPassword({ value: "" });
       setUsername({ value: "" });
-
-      setAlert(true);
-      setAlertMessage(
-        "Succesfully registered! Check your email for a confirmation message"
-      );
       setScreen(Screen.LOGIN);
     }
   };
@@ -97,8 +138,10 @@ const Login = () => {
       setEmail({ value: "" });
       setUsername({ value: "" });
 
-      setAlert(true);
-      setAlertMessage("Password reset email sent!");
+      setAlertMessage({
+        color: "success",
+        message: "Password reset email sent!",
+      });
       setScreen(Screen.LOGIN);
     }
   };
@@ -107,14 +150,14 @@ const Login = () => {
     <Box>
       {screen === Screen.LOGIN ? (
         <>
-          <form className={styles.form} onSubmit={onSubmit}>
+          <form className={styles.form} onSubmit={login}>
             <TextField
-              label="Email"
-              type="email"
-              error={email.error !== undefined}
-              helperText={email.error}
-              value={email.value}
-              onChange={(e) => setEmail({ value: e.target.value })}
+              label="Username"
+              type="text"
+              error={username.error !== undefined}
+              helperText={username.error}
+              value={username.value}
+              onChange={(e) => setUsername({ value: e.target.value })}
             />
             <div style={{ padding: "10px 0" }} />
             <TextField
@@ -246,22 +289,6 @@ const Login = () => {
             Cancel
           </Button>
         </>
-      )}
-      {alert && (
-        <Snackbar
-          open={alert}
-          autoHideDuration={6000}
-          onClose={() => setAlert(false)}
-        >
-          <Alert
-            onClose={() => {
-              setAlert(false);
-              setAlertMessage("");
-            }}
-          >
-            {alertMessage}
-          </Alert>
-        </Snackbar>
       )}
     </Box>
   );

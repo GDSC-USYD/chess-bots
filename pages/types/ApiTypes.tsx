@@ -5,7 +5,13 @@ export interface ApiBaseResponse {
   message: string;
 }
 
-export type ApiEloResponse = ApiBaseResponse & { payload: User[] };
+export interface UserGetDto {
+  elo_score: number;
+  name: string;
+  player_id: number;
+}
+
+export type ApiEloResponse = ApiBaseResponse & { payload: UserGetDto[] };
 
 export type ApiAuthResponse = ApiBaseResponse & { payload: string };
 

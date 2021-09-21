@@ -4,6 +4,7 @@
 
 .container {
   max-height: 75vh;
+  min-height: 70vh;
 }
 
 .toolbar {
