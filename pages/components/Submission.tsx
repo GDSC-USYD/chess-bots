@@ -69,12 +69,16 @@ const Submission = ({ setAlertMessage }: Props) => {
   };
 
   return (
-    <Box className={styles.form}>
-      <Typography variant="h5" style={{ padding: "1rem 0" }}>
+    <Box className={`${styles.form} ${styles.box}`}>
+      <Typography variant="h5" style={{ margin: "1rem 0" }}>
         Ready to Submit?
       </Typography>
-      <Box>Insert a link to your model into the box below.</Box>
-      <Box>Check out the instructions on the left for more details.</Box>
+      <Box style={{ textAlign: "center" }}>
+        Insert a link to your model into the box below.
+      </Box>
+      <Box style={{ textAlign: "center" }}>
+        Check out the instructions on the left for more details.
+      </Box>
       <form
         onSubmit={handleSubmit}
         className={styles.form}
