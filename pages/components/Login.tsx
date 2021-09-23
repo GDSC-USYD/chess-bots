@@ -5,8 +5,6 @@ import { createUser, loginUser } from "../api/routes";
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
-import Alert from "@material-ui/lab/Alert";
-import Snackbar from "@material-ui/core/Snackbar";
 import { Color } from "@material-ui/lab/Alert";
 
 type Input = { value: string; error?: string };
@@ -82,17 +80,27 @@ const Login = ({ setLoggedIn, setAlertMessage }: Props) => {
         return { ...email, error: "Please enter an email address" };
       });
 
-    if (!password.value)
+    if (!password.value) {
       setPassword((password) => {
         return { ...password, error: "Please enter a password" };
       });
+    } else if (password.value.length < 8) {
+      setPassword((password) => {
+        return { ...password, error: "Password must be at least 8 characters" };
+      });
+    }
 
     if (!username.value)
       setUsername((username) => {
         return { ...username, error: "Please enter a username" };
       });
 
-    if (password.value && email.value && username.value) {
+    if (
+      password.value &&
+      email.value &&
+      username.value &&
+      password.value.length >= 8
+    ) {
       const res = await createUser({
         username: username.value,
         email: email.value,

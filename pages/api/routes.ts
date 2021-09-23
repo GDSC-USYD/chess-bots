@@ -91,3 +91,22 @@ export const forgotPassword = async (data: ForgotDto): Promise<boolean> => {
     return false;
   }
 };
+
+export const updateModelUrl = async (
+  url: string,
+  token: string
+): Promise<boolean> => {
+  try {
+    let formData = new FormData();
+    const headers = { Authorisation: token };
+    formData.append("model_url", url);
+
+    const res = await api.post("/update", formData, { headers: headers });
+
+    if (res.status === 201) return true;
+    else return false;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};

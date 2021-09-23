@@ -5,6 +5,7 @@ import Box from "@material-ui/core/Box";
 import Login from "./Login";
 import Typography from "@material-ui/core/Typography";
 import { AlertItem } from "../types/UtilityTypes";
+import Submission from "./Submission";
 
 interface Props {
   setAlertMessage: (alertItem: AlertItem) => void;
@@ -23,7 +24,7 @@ const RightPanel = ({ setAlertMessage }: Props) => {
         User Area
       </Typography>
       {loggedIn ? (
-        <div></div>
+        <Submission setAlertMessage={setAlertMessage} />
       ) : (
         <Login setLoggedIn={setLoggedIn} setAlertMessage={setAlertMessage} />
       )}
