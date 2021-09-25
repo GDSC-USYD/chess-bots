@@ -22,7 +22,7 @@ export interface GameGetDto {
   player_2_score: number | null;
   status_flag: number | null;
   time: Date | null;
-  winner_id: User["id"] | null;
+  winner_id: string | null;
 }
 
 export type ApiEloResponse = ApiBaseResponse & { payload: UserGetDto[] };

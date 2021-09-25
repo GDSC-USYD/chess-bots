@@ -55,7 +55,8 @@ export const getGames = async (): Promise<Game[]> => {
         player2: g.player_2_id ?? 0,
         mmrChange1: g.player_1_score ?? 0,
         mmrChange2: g.player_2_score ?? 0,
-        winner: g.winner_id ?? 0,
+        winner:
+          g.winner_id && parseInt(g.winner_id) ? parseInt(g.winner_id) : 0,
         timestamp: g.time && g.date ? new Date(g.date + "T" + g.time) : null,
         pgn: g.pgn ?? "",
       };
