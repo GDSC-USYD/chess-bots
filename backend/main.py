@@ -203,7 +203,7 @@ def register_new_player():
 
 @app.route('/<player_id>/model_url', methods=["GET"]) # GET e.g /2/model_url
 def return_model_url(player_id):
-    # retrieves match pgn given match_id
+    # retrieves player model_url given player_id
     db = connect_to_db()
 
     with db.connect() as conn:
@@ -245,7 +245,7 @@ def return_pgn(match_id):
         # Match doesn't exist / error retrieving from DB
         pgn = None
     else:
-        pgn = db_match[3]
+        pgn = db_match[5]
 
     # if found
     if pgn != None:
