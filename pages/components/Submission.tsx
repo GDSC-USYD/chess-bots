@@ -12,9 +12,10 @@ type Input = { value: string; error?: string };
 
 interface Props {
   setAlertMessage: (alertItem: AlertItem) => void;
+  setLoggedIn: (state: boolean) => void;
 }
 
-const Submission = ({ setAlertMessage }: Props) => {
+const Submission = ({ setAlertMessage, setLoggedIn }: Props) => {
   const [link, setLink] = useState<Input>({ value: "" });
 
   const validUrl = (str: string) => {
@@ -68,6 +69,11 @@ const Submission = ({ setAlertMessage }: Props) => {
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    setLoggedIn(false);
+  };
+
   return (
     <Box className={`${styles.form} ${styles.box}`}>
       <Typography variant="h5" style={{ margin: "1rem 0" }}>
@@ -104,6 +110,16 @@ const Submission = ({ setAlertMessage }: Props) => {
           Submit
         </Button>
       </form>
+
+      <Button
+        variant="contained"
+        color="secondary"
+        className={styles.button}
+        style={{ marginTop: "2rem" }}
+        onClick={logout}
+      >
+        Log out
+      </Button>
     </Box>
   );
 };

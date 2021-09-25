@@ -46,7 +46,7 @@ const Home: NextPage = () => {
         </Box>
 
         <Box className={styles.right}>
-          <RightPanel setAlertMessage={setAlertMessage} />
+          <RightPanel setAlertMessage={setAlertMessage} users={users} />
         </Box>
       </Box>
       {!!alertMessage && (

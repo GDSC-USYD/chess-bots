@@ -6,6 +6,7 @@ import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
 import { Color } from "@material-ui/lab/Alert";
+import { User } from "../types/UserTypes";
 
 type Input = { value: string; error?: string };
 type AlertItem = { color: Color; message: string };
@@ -19,9 +20,10 @@ enum Screen {
 interface Props {
   setLoggedIn: (loggedIn: boolean) => void;
   setAlertMessage: (alertItem: AlertItem) => void;
+  users: User[];
 }
 
-const Login = ({ setLoggedIn, setAlertMessage }: Props) => {
+const Login = ({ setLoggedIn, setAlertMessage, users }: Props) => {
   const [email, setEmail] = useState<Input>({ value: "" });
   const [password, setPassword] = useState<Input>({ value: "" });
   const [username, setUsername] = useState<Input>({ value: "" });
@@ -90,16 +92,22 @@ const Login = ({ setLoggedIn, setAlertMessage }: Props) => {
       });
     }
 
-    if (!username.value)
+    if (!username.value) {
       setUsername((username) => {
         return { ...username, error: "Please enter a username" };
       });
+    } else if (users.find((u) => u.username === username.value)) {
+      setUsername((username) => {
+        return { ...username, error: "Username already taken (too slow!)" };
+      });
+    }
 
     if (
       password.value &&
       email.value &&
       username.value &&
-      password.value.length >= 8
+      password.value.length >= 8 &&
+      !users.find((u) => u.username === username.value)
     ) {
       const res = await createUser({
         username: username.value,

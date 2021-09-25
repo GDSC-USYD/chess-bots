@@ -99,7 +99,11 @@ export const updateModelUrl = async (
   try {
     let formData = new FormData();
     const headers = { Authorisation: token };
-    formData.append("model_url", url);
+
+    formData.append("table_name", "players");
+    formData.append("id_value", "4"); //TODO: change route on backend
+    formData.append("var_name", "model_url");
+    formData.append("var_value", url);
 
     const res = await api.post("/update", formData, { headers: headers });
 
