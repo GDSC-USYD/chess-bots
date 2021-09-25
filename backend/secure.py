@@ -1,7 +1,7 @@
 import jwt
 import os
 from datetime import datetime, timedelta
-
+#from passlib.hash import sha256_crypt
 
 
 def decode_auth_token(auth_token):
@@ -12,15 +12,15 @@ def decode_auth_token(auth_token):
     """
     try:
         payload = jwt.decode(auth_token, os.environ["DB_PASS"], algorithms=["HS256"])
-        return payload['sub']
+        return (payload['sub'], "OK")
     except jwt.ExpiredSignatureError:
-        return 'Signature expired. Please login again.'
+        return ('Signature expired. Please login again.', "EXPIRED")
     except jwt.InvalidTokenError as e:
         print(e)
-        return 'Invalid token. Please login again.'
+        return ('Invalid token. Please login again.', "INVALID")
     except Exception as e:
         print(e)
-        return str(e)
+        return (str(e), "ERROR")
 
 
 

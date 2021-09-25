@@ -1,7 +1,7 @@
 from db_connect import *
 #from game_master import *
 from db_access import *
-from jwt_secure import *
+from secure import *
 #from send_email import * # email function added soon
 
 
@@ -373,7 +373,7 @@ def launch_chess_game_master():
 def update_entry():
     # updates given table entry's coloumn value in database to given value
     # recieves form dict ->
-    # {"table_name":table_name, "id_value":id_value, "var_name":var_name, "var_value":var_value}
+    # {"table_name":table_name, "var_name":var_name, "var_value":var_value}
 
     data_dict = request.form.to_dict()
 
@@ -382,19 +382,17 @@ def update_entry():
     # try import and validate given values
     try:
         table_name = data_dict["table_name"]
-        id_value = int(data_dict["id_value"])
         var_name = data_dict["var_name"]
         var_value = data_dict["var_value"].replace("\'", "‘") #change single quotes
         auth_token = request.headers.get("Authorisation")
 
         # check that JWT authorisation token is valid, returns player_id or error
-        auth_return = decode_auth_token(auth_token)
+        auth_return, auth_status = decode_auth_token(auth_token)
 
-        if auth_return != id_value:
-            if isinstance(auth_return, int):
-                raise Exception(id_value, "Authorisation token refused: Wrong player token.")
-            else:
-                raise Exception(id_value, "Authorisation token refused: " + str(auth_return))
+        if auth_status == "OK":
+            id_value = auth_return            
+        else:
+            raise Exception(auth_status, "Authorisation token refused: " + str(auth_return))
 
         # only accept variable changes to model_url
         if var_name != "model_url":
@@ -417,7 +415,7 @@ def update_entry():
 
 
     except Exception as e:
-        if len(e.args) > 0:
+        if len(e.args) > 1:
             credentials_message = f"Error with value: {e.args[0]}. {e.args[1]}"
         else:
             credentials_message = e
