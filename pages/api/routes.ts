@@ -2,11 +2,13 @@ import api from "./api";
 import {
   ApiAuthResponse,
   ApiEloResponse,
+  ApiGameResponse,
   ForgotDto,
   LoginDto,
   RegisterDto,
 } from "../types/ApiTypes";
 import { User } from "../types/UserTypes";
+import { Game } from "../types/GameTypes";
 
 // Check the fields
 function CheckFields<T>(obj: any, fields: (keyof T)[]): T {
@@ -31,6 +33,31 @@ export const getUsers = async (): Promise<User[]> => {
         id: u.player_id ?? 0,
         username: u.name ?? "",
         mmr: u.elo_score ?? 0,
+      };
+    });
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
+};
+
+export const getGames = async (): Promise<Game[]> => {
+  try {
+    const res = CheckFields<ApiGameResponse>((await api.get("/matches")).data, [
+      "code",
+      "message",
+      "payload",
+    ]);
+
+    return res.payload.map((g) => {
+      return {
+        player1: g.player_1_id ?? 0,
+        player2: g.player_2_id ?? 0,
+        mmrChange1: g.player_1_score ?? 0,
+        mmrChange2: g.player_2_score ?? 0,
+        winner: g.winner_id ?? 0,
+        timestamp: g.time && g.date ? new Date(g.date + "T" + g.time) : null,
+        pgn: g.pgn ?? "",
       };
     });
   } catch (err) {

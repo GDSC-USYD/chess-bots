@@ -6,12 +6,28 @@ export interface ApiBaseResponse {
 }
 
 export interface UserGetDto {
-  elo_score: number;
-  name: string;
-  player_id: number;
+  elo_score: number | null;
+  name: string | null;
+  player_id: number | null;
+}
+
+export interface GameGetDto {
+  batch_id: number | null;
+  date: Date | null;
+  match_id: number | null;
+  pgn: string | null;
+  player_1_id: User["id"] | null;
+  player_1_score: number | null;
+  player_2_id: User["id"] | null;
+  player_2_score: number | null;
+  status_flag: number | null;
+  time: Date | null;
+  winner_id: User["id"] | null;
 }
 
 export type ApiEloResponse = ApiBaseResponse & { payload: UserGetDto[] };
+
+export type ApiGameResponse = ApiBaseResponse & { payload: GameGetDto[] };
 
 export type ApiAuthResponse = ApiBaseResponse & { payload: string };
 
