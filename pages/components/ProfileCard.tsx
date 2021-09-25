@@ -39,7 +39,8 @@ const ProfileCard = ({ user }: Props) => {
         )}
       </CardContent>
       <CardActions className={styles.action}>
-        <Button disabled={!user}>
+        <Button disabled={!user || true}>
+          {/* TODO: Renable when you can play against bots */}
           Play against this player <ChevronRightIcon />
         </Button>
       </CardActions>

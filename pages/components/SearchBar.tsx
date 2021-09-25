@@ -24,10 +24,6 @@ const SearchBar = ({ users, setSelectedUser }: Props) => {
 
   const anchorRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (search) setOpen(true);
-  }, [search]);
-
   return (
     <>
       <Paper className={styles.root}>
@@ -36,7 +32,11 @@ const SearchBar = ({ users, setSelectedUser }: Props) => {
           <InputBase
             placeholder="Search and filter by a User"
             ref={anchorRef}
-            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              if (e.target.value) setOpen(true);
+            }}
             style={{ width: "100%" }}
           />
         </div>
@@ -59,6 +59,7 @@ const SearchBar = ({ users, setSelectedUser }: Props) => {
                         key={u.id}
                         onClick={(event) => {
                           setSelectedUser(u.id);
+                          setSearch(u.username);
                           setOpen(false);
                         }}
                       >
