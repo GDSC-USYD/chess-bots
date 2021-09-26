@@ -529,9 +529,10 @@ class ChessGameMaster:
                 # ready to play game
                 try:
                     self.play_chess(player_1, player_2)
-                except:
+                except Exception as e:
                     print("Unknown error in playing game.")
-                    status_flag = 3 # other error flag
+                    return str(e)
+                    status_flag = -3 # other error flag
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
 
             else: # known error with one of the players
