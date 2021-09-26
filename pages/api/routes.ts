@@ -56,9 +56,10 @@ export const getGames = async (): Promise<Game[]> => {
         mmrChange1: g.player_1_score ?? 0,
         mmrChange2: g.player_2_score ?? 0,
         winner:
-          g.winner_id && parseInt(g.winner_id) ? parseInt(g.winner_id) : 0,
+          g.winner_id && parseInt(g.winner_id) ? parseInt(g.winner_id) : null,
         timestamp: g.time && g.date ? new Date(g.date + "T" + g.time) : null,
         pgn: g.pgn ?? "",
+        status: g.status_flag ?? 1,
       };
     });
   } catch (err) {

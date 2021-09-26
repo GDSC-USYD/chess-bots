@@ -24,7 +24,15 @@ const Home: NextPage = () => {
   useEffect(() => {
     const populate = async () => {
       setUsers(await getUsers());
-      setGames(await getGames());
+      setGames(
+        (await getGames()).sort((a, b) => {
+          if (b.timestamp && a.timestamp)
+            return b.timestamp.getTime() - a.timestamp.getTime();
+          else if (b.timestamp) return -1;
+          else if (a.timestamp) return -1;
+          else return 0;
+        })
+      );
     };
 
     populate();
