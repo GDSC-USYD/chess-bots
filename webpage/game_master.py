@@ -550,7 +550,7 @@ class ChessGameMaster:
         # end VM instance
         self.conn.close()
 
-        launch_status = "OK"
+        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))
 
         return launch_status
 
