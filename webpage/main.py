@@ -204,6 +204,7 @@ def register_new_player():
 
 
 
+
 @app.route('/<player_id>/model_url', methods=["GET"]) # GET e.g /2/model_url
 def return_model_url(player_id):
     # retrieves player model_url given player_id
