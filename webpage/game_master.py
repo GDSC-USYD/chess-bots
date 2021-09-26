@@ -241,7 +241,7 @@ class ChessGameMaster:
             if db_upload_message != "OK":
                 print("Error uploading player.")
                 print(db_upload_message)
-                break
+                return db_upload_message
 
 
     def update_matches_data(self):
@@ -255,7 +255,7 @@ class ChessGameMaster:
             if db_upload_message != "OK":
                 print("Error uploading match.")
                 print(db_upload_message)
-                break
+                return db_upload_message
 
 
     def get_batch_id(self):
@@ -544,8 +544,9 @@ class ChessGameMaster:
             self.calculate_elo_score(player)
 
         # update database
-        self.update_players_data() #uploads all player object data to db
-        self.update_matches_data() #uploads all matches object data to db
+        db_upload_message = self.update_players_data() #uploads all player object data to db
+        if db_upload_message == "OK":
+            db_upload_message = self.update_matches_data() #uploads all matches object data to db
 
         # end VM instance
 
@@ -560,7 +561,7 @@ class ChessGameMaster:
 
 
 
-        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))+ " "+ str(p_errors)+ " "+ str(m_errors)
+        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))+ " "+ str(p_errors)+ " "+ str(m_errors) + str(db_upload_message)
 
         return launch_status
 
