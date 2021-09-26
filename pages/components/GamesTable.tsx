@@ -100,9 +100,9 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
       case 1:
         return "Match complete!";
       case -1:
-        return "Match couldn't be processed - invalid model link detected!";
+        return "Match couldn't be processed - Invalid model link detected!";
       case -2:
-        return "Match couldn't be processed - invalid model detected!";
+        return "Match couldn't be processed - Invalid model detected!";
       case -3:
         return "Match couldn't be processed";
       default:
