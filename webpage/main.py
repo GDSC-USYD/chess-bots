@@ -372,7 +372,7 @@ def launch_chess_game_master():
     if launch_status == "OK":
         data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
         status_code = 201
-    else launch_status:
+    else:
         data = {'message': 'Failed', 'code': 'FAIL', 'payload':launch_status}
         status_code = 500
 
