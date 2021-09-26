@@ -545,6 +545,8 @@ class ChessGameMaster:
         for player in self.players:
             self.calculate_elo_score(player)
 
+        x-y=
+
         # update database
         self.update_players_data() #uploads all player object data to db
         self.update_matches_data() #uploads all matches object data to db
