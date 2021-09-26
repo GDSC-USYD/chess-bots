@@ -539,8 +539,6 @@ class ChessGameMaster:
                     status_flag = max(player_error_flags) # set match status flag the first occuring of the player errors
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
 
-
-
         # finished games
         for player in self.players:
             self.calculate_elo_score(player)
@@ -551,6 +549,11 @@ class ChessGameMaster:
 
         # end VM instance
         self.conn.close()
+
+        launch_status = "OK"
+
+        return launch_status
+
 
 
 if __name__ == "__main__":
