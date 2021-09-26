@@ -548,9 +548,19 @@ class ChessGameMaster:
         self.update_matches_data() #uploads all matches object data to db
 
         # end VM instance
-        self.conn.close()
 
-        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))
+        p_errors = 0
+        for player in self.players:
+            if player.status_flag < 0:
+                p_errors += 1
+        m_errors = 0
+        for match in self.matches:
+            if match.status_flag < 0:
+                m_errors += 1
+
+
+
+        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))+ " "+ str(p_errors)+ " "+ str(m_errors)
 
         return launch_status
 

@@ -363,6 +363,7 @@ def launch_chess_game_master():
             chess_game_master = ChessGameMaster(conn)
 
             launch_status = chess_game_master.run()
+            conn.close()
             #threading.Thread(target=chess_game_master.run).start()
 
     except Exception as e:
