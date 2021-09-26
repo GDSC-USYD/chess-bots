@@ -8,7 +8,7 @@
 #    i. tracks/calculates game data such as num moves, pieces, player scores, num moves
 # 5. (DB) sends game data and player data for this batch into DB
 
-
+from db_access import *
 import os
 import re
 import requests
