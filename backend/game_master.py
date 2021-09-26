@@ -554,7 +554,6 @@ class ChessGameMaster:
         # end VM instance
         self.conn.close()
 
-        x-y=        
 
 
 if __name__ == "__main__":
