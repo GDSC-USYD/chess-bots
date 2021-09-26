@@ -367,16 +367,13 @@ def launch_chess_game_master():
 
     except Exception as e:
         print("Error launching game master:", str(e))
-        launch_status = e
+        launch_status = str(e)
 
     if launch_status == "OK":
         data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
         status_code = 201
-    elif launch_status == "NOT OK":
+    else launch_status:
         data = {'message': 'Failed', 'code': 'FAIL', 'payload':launch_status}
-        status_code = 500
-    else:
-        data = {'message': 'Failed', 'code': 'FAIL', 'payload':str(e)}
         status_code = 500
 
     response = make_response(jsonify(data), status_code)
