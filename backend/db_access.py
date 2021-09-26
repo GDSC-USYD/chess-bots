@@ -6,7 +6,6 @@ import re
 
 
 
-
 def db_update_player_data(conn, player):
     #updates player data in db according to given player object
 
@@ -18,10 +17,11 @@ def db_update_player_data(conn, player):
     # self.model_path = None
     # self.scores = []
 
+    db_upload_message = "OK"
+
     try:
-        #conn.begin()
         conn.execute(f"UPDATE players SET elo_score = '{player.elo_score}', status_flag = '{player.status_flag}' WHERE player_id = {player.player_id};")
-        #conn.commit()
+
         return db_upload_message
     except Exception as e:
         print(e)
@@ -34,15 +34,25 @@ def db_update_player_data(conn, player):
 
 
 
+def db_insert_new_match(conn, match):
+    #inserts new match data in db according to given matche object
 
-#NOT FINISHED
-def db_insert_matches_data(conn, batch_id, matches_data):
-    #inserts new matches data in db according to given matches object list
+    db_upload_message = "OK"
 
-    #for match in matches_data:
+    try:
+        if match.status_flag < 0: # no game played
+            conn.execute(f"INSERT INTO matches (player_1_id, player_2_id, batch_id, date, time, status_flag) VALUES ({match.player_1_id}, {match.player_2_id}, {match.batch_id}, '{match.date}', '{match.time}', {match.status_flag});")
+        elif match.status_flag == 2: # tied and no winner found
+            conn.execute(f"INSERT INTO matches (player_1_id, player_1_score, player_2_id, player_2_score, pgn, batch_id, date, time, status_flag) VALUES ({match.player_1_id}, {match.player_1_score}, {match.player_2_id}, {match.player_2_score}, '{match.pgn}', {match.batch_id}, '{match.date}', '{match.time}', {match.status_flag});")
+        else:
+            conn.execute(f"INSERT INTO matches (player_1_id, player_1_score, player_2_id, player_2_score, pgn, batch_id, date, time, winner_id, status_flag) VALUES ({match.player_1_id}, {match.player_1_score}, {match.player_2_id}, {match.player_2_score}, '{match.pgn}', {match.batch_id}, '{match.date}', '{match.time}', {match.winner_id}, {match.status_flag});")
+        #conn.execute(f"UPDATE matches SET player_1_id = {match.player_1_id}, player_1_score = {match.player_1_score}, player_2_id = {match.player_2_id}, player_2_score = {match.player_2_score}, pgn = '{match.pgn}', batch_id = '{match.batch_id}', date = '{match.date}', time = '{match.time}', winner_id = {match.winner_id}, status_flag = {match.status_flag} ;")
 
-
-    pass
+        return db_upload_message
+    except Exception as e:
+        print(e)
+        db_upload_message = e
+        return db_upload_message
 
 
 
@@ -74,7 +84,7 @@ def db_insert_new_player(conn, table_name, name, password, email):
     # insert new player into db
     try:
         #conn.begin()
-        conn.execute(f"INSERT INTO {table_name} (name, status_flag, password, email) VALUES ('{name}', {status_flag}, '{password}', '{email}');")
+        conn.execute(f"INSERT INTO {table_name} (name, elo_score, status_flag, password, email) VALUES ('{name}', 0, {status_flag}, '{password}', '{email}');")
         #conn.commit()
 
         # check now in database and retrieve player_id
@@ -209,8 +219,11 @@ def db_describe_table(conn, table_name):
 
 
 def db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value):
-    # uploads given model_url's into database of given player_id's
+    # uploads given coloumn (model_url) into database of given player_id
+    # RESETS status_flag to -> 1 (model_url given)
     # returns db_upload_message string -> status of db update
+    # NOTE: re-coded to for updates to model_url
+
     db_upload_message = "OK"
 
     db_entry = conn.execute(
@@ -220,7 +233,7 @@ def db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value):
     if len(db_entry) > 0:
         try:
             #conn.begin()
-            conn.execute(f"UPDATE {table_name} SET {var_name} = '{var_value}' WHERE {id_name} = {id_value};")
+            conn.execute(f"UPDATE {table_name} SET {var_name} = '{var_value}', status_flag = 1 WHERE {id_name} = {id_value};")
             #conn.commit()
             return db_upload_message
         except Exception as e:

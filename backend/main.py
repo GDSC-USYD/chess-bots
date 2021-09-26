@@ -374,6 +374,7 @@ def update_entry():
     # updates given table entry's coloumn value in database to given value
     # recieves form dict ->
     # {"table_name":table_name, "var_name":var_name, "var_value":var_value}
+    # NOTE: re-coded to only accept updates to model_url
 
     data_dict = request.form.to_dict()
 
@@ -382,6 +383,7 @@ def update_entry():
     # try import and validate given values
     try:
         table_name = data_dict["table_name"]
+        #id_value = data_dict["id_value"]
         var_name = data_dict["var_name"]
         var_value = data_dict["var_value"].replace("\'", "‘") #change single quotes
         auth_token = request.headers.get("Authorisation")
@@ -390,7 +392,7 @@ def update_entry():
         auth_return, auth_status = decode_auth_token(auth_token)
 
         if auth_status == "OK":
-            id_value = auth_return            
+            id_value = auth_return
         else:
             raise Exception(auth_status, "Authorisation token refused: " + str(auth_return))
 
