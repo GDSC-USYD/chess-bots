@@ -129,7 +129,6 @@ export const updateModelUrl = async (
     const headers = { Authorisation: token };
 
     formData.append("table_name", "players");
-    formData.append("id_value", "4"); //TODO: change route on backend
     formData.append("var_name", "model_url");
     formData.append("var_value", url);
 
