@@ -1,7 +1,7 @@
 from db_connect import *
 from db_access import *
 from secure import *
-from game_master import *
+#from game_master import *
 #from send_email import * # email function added soon
 
 
@@ -360,9 +360,11 @@ def launch_chess_game_master():
     try:
         db = connect_to_db()
         with db.connect() as conn:
-            chess_game_master = ChessGameMaster(conn)
 
-            launch_status = chess_game_master.run()
+
+            #chess_game_master = ChessGameMaster(conn)
+
+            #launch_status = chess_game_master.run()
             #threading.Thread(target=chess_game_master.run).start()
 
     except Exception as e:
