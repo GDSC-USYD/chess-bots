@@ -241,7 +241,9 @@ class ChessGameMaster:
             if db_upload_message != "OK":
                 print("Error uploading player.")
                 print(db_upload_message)
-                return db_upload_message
+                break
+
+        return db_upload_message
 
 
     def update_matches_data(self):
@@ -255,7 +257,9 @@ class ChessGameMaster:
             if db_upload_message != "OK":
                 print("Error uploading match.")
                 print(db_upload_message)
-                return db_upload_message
+                break
+
+        return db_upload_message
 
 
     def get_batch_id(self):
