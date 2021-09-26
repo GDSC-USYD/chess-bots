@@ -8,7 +8,8 @@ from game_master import *
 
 from flask import Flask, jsonify, make_response, redirect, url_for, request
 from flask_cors import CORS
-import threading
+#import threading
+
 # import os # imported in db_connect
 
 
@@ -350,15 +351,28 @@ def return_elo():
 def launch_chess_game_master():
     # create chess game master and run games in another thread
 
-    db = connect_to_db()
-    with db.connect() as conn:
-        chess_game_master = ChessGameMaster(conn)
-        threading.Thread(target=chess_game_master.run).start()
 
+    print("doing something")
 
-    # assume AOK
-    data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
-    status_code = 201
+    try:
+        db = connect_to_db()
+        with db.connect() as conn:
+            chess_game_master = ChessGameMaster(conn)
+
+            chess_game_master.run()
+            #threading.Thread(target=chess_game_master.run).start()
+            launch_status = "OK"
+    except Exception as e:
+        print("Error launching game master:", str(e))
+        launch_status = e
+
+    if launch_status == "OK":
+        data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
+        status_code = 201
+    else:
+        data = {'message': 'Failed', 'code': 'FAIL', 'payload':str(e)}
+        status_code = 500
+
     response = make_response(jsonify(data), status_code)
     response.headers["Content-Type"] = "application/json"
     return response

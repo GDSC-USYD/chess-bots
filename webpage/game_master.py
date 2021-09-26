@@ -514,6 +514,7 @@ class ChessGameMaster:
         """
         After init calls game functions and database functions
         """
+        print("running the games now")
 
         self.print_players()
 
