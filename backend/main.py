@@ -1,8 +1,9 @@
 from db_connect import *
-#from game_master import *
+from game_master import *
 from db_access import *
 from secure import *
 #from send_email import * # email function added soon
+
 
 
 from flask import Flask, jsonify, make_response, redirect, url_for, request
