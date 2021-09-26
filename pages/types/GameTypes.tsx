@@ -5,7 +5,8 @@ export interface Game {
   player2: User["id"];
   mmrChange1: number;
   mmrChange2: number;
-  winner: User["id"];
+  winner: User["id"] | null;
   timestamp: Date | null;
   pgn: string;
+  status: number;
 }

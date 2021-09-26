@@ -61,6 +61,7 @@ const Submission = ({ setAlertMessage, setLoggedIn }: Props) => {
         color: "success",
         message: "Succesfully submitted your model url!",
       });
+      setLink({ value: "" });
     } else {
       setAlertMessage({
         color: "error",

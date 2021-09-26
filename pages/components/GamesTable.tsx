@@ -93,11 +93,28 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
     document.body.removeChild(a);
   };
 
+  const parseFlag = (g: Game): string => {
+    switch (g.status) {
+      case 2:
+        return "Match complete - Tied result!";
+      case 1:
+        return "Match complete!";
+      case -1:
+        return "Match couldn't be processed - Invalid model link detected!";
+      case -2:
+        return "Match couldn't be processed - Invalid model detected!";
+      case -3:
+        return "Match couldn't be processed";
+      default:
+        return "Match complete!";
+    }
+  };
+
   return (
     <>
       <TableRow
         hover
-        key={g.timestamp?.toString() ?? g.pgn}
+        key={g.timestamp?.toString() + g.pgn}
         onClick={() => setOpen(!open)}
       >
         <TableCell size="small">
@@ -109,7 +126,9 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
             (users.find((u) => u.id === g.player2)?.username ?? "???")}
         </TableCell>
         <TableCell align="center">
-          {users.find((u) => u.id === g.player1)?.username ?? "???"}
+          {g.winner
+            ? users.find((u) => u.id === g.winner)?.username ?? "???"
+            : "-"}
         </TableCell>
         <TableCell align="center">
           {g.timestamp?.toLocaleString() ?? "???"}
@@ -126,7 +145,7 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
                 component="div"
                 style={{ textAlign: "center" }}
               >
-                Match Details
+                {parseFlag(g)}
               </Typography>
               <Box className={styles.collapsible}>
                 <Box className={styles.verticalflex}>
@@ -164,6 +183,7 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
                     color="primary"
                     variant="outlined"
                     style={{ marginRight: "1rem" }}
+                    disabled={g.status < 0}
                   >
                     View this Game
                   </Button>
@@ -171,6 +191,7 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
                     color="primary"
                     variant="outlined"
                     onClick={() => download(g)}
+                    disabled={g.status < 0}
                   >
                     Download PGN File
                   </Button>

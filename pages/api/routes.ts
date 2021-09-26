@@ -56,9 +56,10 @@ export const getGames = async (): Promise<Game[]> => {
         mmrChange1: g.player_1_score ?? 0,
         mmrChange2: g.player_2_score ?? 0,
         winner:
-          g.winner_id && parseInt(g.winner_id) ? parseInt(g.winner_id) : 0,
+          g.winner_id && parseInt(g.winner_id) ? parseInt(g.winner_id) : null,
         timestamp: g.time && g.date ? new Date(g.date + "T" + g.time) : null,
         pgn: g.pgn ?? "",
+        status: g.status_flag ?? 1,
       };
     });
   } catch (err) {
@@ -129,7 +130,6 @@ export const updateModelUrl = async (
     const headers = { Authorisation: token };
 
     formData.append("table_name", "players");
-    formData.append("id_value", "4"); //TODO: change route on backend
     formData.append("var_name", "model_url");
     formData.append("var_value", url);
 
