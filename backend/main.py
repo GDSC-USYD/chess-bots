@@ -204,6 +204,7 @@ def register_new_player():
 
 
 
+
 @app.route('/<player_id>/model_url', methods=["GET"]) # GET e.g /2/model_url
 def return_model_url(player_id):
     # retrieves player model_url given player_id
@@ -354,14 +355,17 @@ def launch_chess_game_master():
 
     print("doing something")
 
+    launch_status = "NOT OK"
+
     try:
         db = connect_to_db()
         with db.connect() as conn:
             chess_game_master = ChessGameMaster(conn)
 
-            chess_game_master.run()
+            launch_status = chess_game_master.run()
+            conn.close()
             #threading.Thread(target=chess_game_master.run).start()
-            launch_status = "OK"
+
     except Exception as e:
         print("Error launching game master:", str(e))
         launch_status = e
@@ -369,6 +373,9 @@ def launch_chess_game_master():
     if launch_status == "OK":
         data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
         status_code = 201
+    elif launch_status == "NOT OK":
+        data = {'message': 'Failed', 'code': 'FAIL', 'payload':launch_status}
+        status_code = 500
     else:
         data = {'message': 'Failed', 'code': 'FAIL', 'payload':str(e)}
         status_code = 500
