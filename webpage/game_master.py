@@ -16,11 +16,15 @@ from datetime import datetime, date
 import chess
 import chess.pgn
 import random
-from tensorflow import keras, transpose
-#from keras import backend
+
+
+# import tensorflow as tf
+# print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+# print("Num CPUs Available: ", len(tf.config.list_physical_devices('CPU')))
+
+from tensorflow import keras
 import numpy
 
-keras.backend.set_image_data_format('channels_last')
 
 
 #### put in own functions file
@@ -114,8 +118,9 @@ class Player:
         self.model_url = model_url
         self.status_flag = status_flag # reset to zero every new VM instance?
         self.model_path = None
-        self.scores = [] #list of their match scores (used to calculate elo)
-        self.model = None # Entire model downloaded and stored
+        self.scores = [] # list of their match scores (used to calculate elo)
+        self.model = None # entire model downloaded and stored
+        self.colour = None # set to "white" or "black" each game
         # status flags:
         # 0 just created (no model link provided)
         # 1 model link added
@@ -160,6 +165,7 @@ class ChessGameMaster:
                 self.download_model(player)
             if player.model_path != None: # download succeeded but not loaded
                 # try load model for each player from downloaded file
+                print("loading")
                 self.load_model(player)
 
         return players
@@ -207,17 +213,27 @@ class ChessGameMaster:
         Sets player status_flag -> 2 (success) | -2 (fail).
         """
         try:
+
+
+
+            print(player.model_path)
+            print(keras.backend.image_data_format())
+
             player.model = keras.models.load_model(player.model_path)
+
+            print(player.model)
+
 
 
             #player.model = transpose(player.model, [0, 2, 3, 1]) # NCHW -> NHWC
 
 
-
-            #images_nchw = tf.placeholder(tf.float32, [None, 3, 200, 300])  # input batch
-            #out = tf.transpose(images_nchw, [0, 2, 3, 1])
-            #player.model.permute(0,2,3,1)
-
+#            keras.backend.set_image_data_format("channels_last")
+        #
+        #     player.model.permute(0,2,3,1)
+        #        with tf.compat.v1.variable_scope('yolo_v3_model'):
+        # if self.data_format == 'channels_first':
+        #     inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
 
             player.status_flag = 2 # set model load error flag
@@ -257,8 +273,6 @@ class ChessGameMaster:
                 print(db_upload_message)
                 break
 
-        return db_upload_message
-
 
     def update_matches_data(self):
         """
@@ -272,8 +286,6 @@ class ChessGameMaster:
                 print("Error uploading match.")
                 print(db_upload_message)
                 break
-
-        return db_upload_message
 
 
     def get_batch_id(self):
@@ -378,41 +390,6 @@ class ChessGameMaster:
             return board3d
 
 
-        # Evaluation function used for the minimax algorithm
-        def minimax_eval(board, model):
-            board3d = split_dims(board)
-            board3d = numpy.expand_dims(board3d, 0)
-            return model.predict(board3d)[0][0]
-
-        def minimax(board, depth, alpha, beta, maximizing_player, model):
-            if depth == 0 or board.is_game_over():
-                return minimax_eval(board, model)
-
-            # White player tries to maximize score
-            if maximizing_player:
-                max_eval = -numpy.inf
-                for move in board.legal_moves:
-                    board.push(move)
-                    eval = minimax(board, depth - 1, alpha, beta, False, model)
-                    board.pop()
-                    max_eval = max(max_eval, eval)
-                    alpha = max(alpha, eval)
-                    if beta <= alpha:
-                        break
-                return max_eval
-            else:
-                # Black player tries to minimize score
-                min_eval = numpy.inf
-                for move in board.legal_moves:
-                    board.push(move)
-                    eval = minimax(board, depth - 1, alpha, beta, True, model)
-                    board.pop()
-                    min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
-                    if beta <= alpha:
-                        break
-                return min_eval
-
         # this is the function that gets the move from the neural network
         def get_ai_move(board, depth, model):
             max_move = None
@@ -428,6 +405,83 @@ class ChessGameMaster:
                     max_move = move
 
             return max_move
+
+
+
+        # used for the minimax algorithm
+        def minimax_eval(board, player):
+            board3d = split_dims(board)
+            board3d = numpy.expand_dims(board3d, 0)
+            #print(model.predict(board3d)[0][0])
+            #if player.colour == "white":
+            return player.model.predict(board3d)[0][0]
+            #elif player.colour == "black":
+              #return 1 - player.model.predict(board3d)[0][0]
+
+
+        def minimax(board, depth, alpha, beta, player, maximising):
+            if depth == 0 or board.is_game_over():
+                return minimax_eval(board, player)
+
+            if maximising == True: # maximizing_player
+                max_eval = -numpy.inf
+                for move in board.legal_moves:
+                    board.push(move)
+                    eval = minimax(board, depth - 1, alpha, beta, player, False)
+                    board.pop()
+                    max_eval = max(max_eval, eval)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
+                return max_eval
+
+            elif maximising == False: # minimising_player
+                min_eval = numpy.inf
+                for move in board.legal_moves:
+                    board.push(move)
+                    eval = minimax(board, depth - 1, alpha, beta, player, True)
+                    board.pop()
+                    min_eval = min(min_eval, eval)
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break
+                return min_eval
+
+
+        # This is the actual function that gets the move from the neural network
+        def get_ai_move(board, depth, player):
+            # White player tries to maximize score
+            if player.colour == "white":
+              max_move = None
+              # set max to -infinity
+              max_eval = -numpy.inf
+
+              for move in board.legal_moves:
+                  board.push(move)
+                  eval = minimax(board, depth - 1, -numpy.inf, numpy.inf, player, maximising=False)
+                  board.pop()
+                  if eval > max_eval:
+                      max_eval = eval
+                      max_move = move
+
+              return max_move
+
+            # Black player tries to minimize score
+            elif player.colour == "black":
+              min_move = None
+              # set min to infinity
+              min_eval = numpy.inf
+
+              for move in board.legal_moves:
+                  board.push(move)
+                  eval = minimax(board, depth - 1, -numpy.inf, numpy.inf, player, maximising=True)
+                  board.pop()
+                  if eval < min_eval:
+                      min_eval = eval
+                      min_move = move
+              return min_move
+
+
 
 
         """
@@ -448,19 +502,25 @@ class ChessGameMaster:
         ##Should be changed to players Ids/names
         game.headers["White"] = player_1.name
         game.headers["Black"] = player_2.name
+        player_1.colour = "white"
+        player_2.colour = "black"
 
         game.setup(board)
         node = game
 
-        ###start match
+        ### START MATCH
         iteration = 0
+
+        minmax_depth = 1 # Set to greater for better search
+
         while True:
             # Player 1 move
             # set random starting point everytime
             if iteration == 0:
                 move = random.choice([move for move in board.legal_moves])
             else:
-                move = get_ai_move(board, 1, player_1.model)
+                move = get_ai_move(board, minmax_depth, player_1)
+
             iteration += 1
             board.push(move)
             # save in PGN
@@ -470,7 +530,7 @@ class ChessGameMaster:
                 break
 
             # Player 2 move
-            move = get_ai_move(board, 1, player_2.model)
+            move = get_ai_move(board, minmax_depth, player_2)
             board.push(move)
             # save in PGN
             node = node.add_variation(move)
@@ -543,7 +603,7 @@ class ChessGameMaster:
                 # ready to play game
                 try:
                     self.play_chess(player_1, player_2)
-                except Exception as e:
+                except:
                     print("Unknown error in playing game:", str(e))
                     status_flag = -3 # other error flag
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
@@ -562,24 +622,12 @@ class ChessGameMaster:
             self.calculate_elo_score(player)
 
         # update database
-        db_upload_message = self.update_players_data() #uploads all player object data to db
-        if db_upload_message == "OK":
-            db_upload_message = self.update_matches_data() #uploads all matches object data to db
+        self.update_players_data() #uploads all player object data to db
+        self.update_matches_data() #uploads all matches object data to db
 
         # end VM instance
 
-        p_errors = 0
-        for player in self.players:
-            if player.status_flag < 0:
-                p_errors += 1
-        m_errors = 0
-        for match in self.matches:
-            if match.status_flag < 0:
-                m_errors += 1
-
-
-
-        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))+ " "+ str(p_errors)+ " "+ str(m_errors) + str(db_upload_message)
+        launch_status = "OK"
 
         return launch_status
 
