@@ -8,8 +8,7 @@ from game_master import *
 
 from flask import Flask, jsonify, make_response, redirect, url_for, request
 from flask_cors import CORS
-#import threading
-
+#import threading # Cloud Run automatically increases container instances 
 # import os # imported in db_connect
 
 
@@ -27,13 +26,11 @@ def send_reminder_email(email, password):
 
 @app.route('/forgotpass', methods=["POST"]) # POST
 def player_reset_password():
-    # sends email to given email address to regain password
-    # recieves form dict ->
-    # {"name":name, "email", email}
-
+    """
+    Sends email reminder to player email address to regain password
+    Recieves form dict -> {"name":name, "email", email}
+    """
     data_dict = request.form.to_dict()
-
-    print(data_dict)
 
     # try import and validate given values
     try:
@@ -85,14 +82,14 @@ def player_reset_password():
 
 @app.route('/login', methods=["POST"]) # POST
 def player_login():
-    # accepts or refuses player login request into db
-    # recieves form dict ->
-    # {"name":name, "password":password}
+    """
+    Accepts or refuses player login request into db
+    Recieves dict form -> {"name":name, "password":password}
+    Returns -> JWT | nothing
+    """
 
     # read form data
     data_dict = request.form.to_dict()
-
-    print(data_dict)
 
     # try import and validate given values
     try:
@@ -142,13 +139,13 @@ def player_login():
 
 @app.route('/register', methods=["POST"]) # POST
 def register_new_player():
-    # inserts new player into db
-    # recieves form dict ->
-    # {"name":name, "password":password, "email", email}
+    """
+    # Inserts new player into db
+    # Receives dict form -> {"name":name, "password":password, "email", email}
+    # Returns -> JWT
+    """
 
     data_dict = request.form.to_dict()
-
-    print(data_dict)
 
     # try import and validate given values
     try:
@@ -204,10 +201,12 @@ def register_new_player():
 
 
 
-
 @app.route('/<player_id>/model_url', methods=["GET"]) # GET e.g /2/model_url
 def return_model_url(player_id):
-    # retrieves player model_url given player_id
+    """
+    Retrieves player model_url given -> player_id
+    Returns -> model_url
+    """
     db = connect_to_db()
 
     with db.connect() as conn:
@@ -237,8 +236,10 @@ def return_model_url(player_id):
 
 @app.route('/<match_id>/pgn', methods=["GET"]) # GET e.g /2/pgn
 def return_pgn(match_id):
-    # retrieves and returns match pgn given match_id
-    # return -> png
+    """
+    Retrieves and returns match pgn given -> match_id
+    Returns -> png
+    """
     db = connect_to_db()
 
     with db.connect() as conn:
@@ -267,8 +268,10 @@ def return_pgn(match_id):
 
 @app.route("/matches", methods=["GET"]) # GET
 def return_matches():
-    # returns the dict of matches with
-    # returns -> [{...match key value pairs...},...]
+    """
+    Returns a dict of all matches and match data
+    Returns -> [{...match key value pairs...},...]
+    """
     db = connect_to_db()
 
     with db.connect() as conn:
@@ -291,8 +294,10 @@ def return_matches():
 
 @app.route("/players", methods=["GET"]) # GET
 def return_players():
-    # returns the list of dictionaries with player data
-    # returns -> [{...player key value pairs...},...]
+    """
+    Returns the list of dictionaries with player data
+    Returns -> [{...player data key value pairs...},...]
+    """
     db = connect_to_db()
 
     with db.connect() as conn:
@@ -319,8 +324,10 @@ def return_players():
 
 @app.route("/elo", methods=["GET"]) # GET
 def return_elo():
-    # returns a list of of shortened player dictionaries
-    # returns -> [{"player_id":player_id, "name":name, "elo_score":elo_score},...]
+    """
+    Returns a list of of shortened player dictionaries with elo_scores
+    Returns -> [{"player_id":player_id, "name":name, "elo_score":elo_score},...]
+    """
     db = connect_to_db()
 
     with db.connect() as conn:
@@ -350,11 +357,10 @@ def return_elo():
 # on scheduler call launch games master to run chess bot games
 @app.route("/rungames", methods=["POST"]) # POST
 def launch_chess_game_master():
-    # create chess game master and run games in another thread
-
-
-    print("doing something")
-
+    """
+    Launches chess game master and runs games, uploads player and match data into db
+    Returns -> nothing
+    """
     launch_status = "NOT OK"
 
     try:
@@ -368,40 +374,33 @@ def launch_chess_game_master():
 
     except Exception as e:
         print("Error launching game master:", str(e))
-        launch_status = e
+        launch_status = str(e)
 
     if launch_status == "OK":
         data = {'message': 'Launched', 'code': 'SUCCESS', 'payload':"OK"}
         status_code = 201
-    elif launch_status == "NOT OK":
-        data = {'message': 'Failed', 'code': 'FAIL', 'payload':launch_status}
-        status_code = 500
     else:
-        data = {'message': 'Failed', 'code': 'FAIL', 'payload':str(e)}
+        data = {'message': 'Failed', 'code': 'FAIL', 'payload':launch_status}
         status_code = 500
 
     response = make_response(jsonify(data), status_code)
     response.headers["Content-Type"] = "application/json"
     return response
-    # keeping second option in case above fails
-    #resp = jsonify(success=True)
-    #return resp
-
-    # third option
-    #return jsonify({'error': 'Admin access is required'}), 401
 
 
 
 @app.route("/update", methods=["POST"])
 def update_entry():
-    # updates given table entry's coloumn value in database to given value
-    # recieves form dict ->
-    # {"table_name":table_name, "var_name":var_name, "var_value":var_value}
-    # NOTE: re-coded to only accept updates to model_url
+    """
+    Updates given table entry's coloumn value in database to given value
+    Recieves dict form -> {"table_name":table_name, "var_name":var_name, "var_value":var_value}
+    Returns -> nothing
 
+    NOTE:
+    Hard-coded to only accept updates to model_url
+    RESETS status_flag to -> 1 (model_url given code)
+    """
     data_dict = request.form.to_dict()
-
-    print(data_dict)
 
     # try import and validate given values
     try:
@@ -438,7 +437,6 @@ def update_entry():
         else:
             raise Exception(table_name, "Invalid table name.")
 
-
     except Exception as e:
         if len(e.args) > 1:
             credentials_message = f"Error with value: {e.args[0]}. {e.args[1]}"
@@ -472,62 +470,62 @@ def update_entry():
 
 
 
-# returns a html string of db contents to display on page + db table descriptions
-@app.route("/database", methods=["GET"]) # GET
-def print_db():
+# # returns a html string of db contents to display on page + db table descriptions
+# @app.route("/database", methods=["GET"]) # GET
+# def print_db():
+#
+#     # connect to db
+#     db = connect_to_db()
+#
+#     # create returned html string
+#     html_string = "<!DOCTYPE html><html><body>"
+#
+#     # populate html body with database table contents & desciptions
+#     with db.connect() as conn:
+#
+#         # show entries of database tables
+#         db_players = db_retrieve_table_data(conn, "players")
+#         db_players = (x[:-1] for x in db_players) # removes last password coloumn
+#
+#         html_string += "<h1>Players\n</h1>"
+#
+#         for x in db_players:
+#             html_string += f"<p>{x}\n</p>"
+#
+#         html_string += "<h1>Matches\n</h1>"
+#
+#         db_matches = db_retrieve_table_data(conn, "matches")
+#
+#         for x in db_matches:
+#             html_string += f"<p>{x}\n</p>"
+#
+#         # describe database tables
+#         html_string += "<h1>Players Description\n</h1>"
+#
+#         db_describe_players = db_describe_table(conn, "players")
+#         for x in db_describe_players:
+#             html_string += f"<p>{x}\n</p>"
+#
+#         html_string += "<h1>Matches Description\n</h1>"
+#
+#         db_describe_matches = db_describe_table(conn, "matches")
+#         for x in db_describe_matches:
+#             html_string += f"<p>{x}\n</p>"
+#
+#         batch_id = db_latest_batch_id(conn)
+#         html_string += f"<p>Latest Batch ID: {batch_id}\n</p>"
+#         conn.close()
+#
+#     # close off returned html string
+#     html_string += "</body></html>"
+#
+#     return html_string
 
-    # connect to db
-    db = connect_to_db()
-
-    # create returned html string
-    html_string = "<!DOCTYPE html><html><body>"
-
-    # populate html body with database table contents & desciptions
-    with db.connect() as conn:
-
-        # show entries of database tables
-        db_players = db_retrieve_table_data(conn, "players")
-        db_players = (x[:-1] for x in db_players) # removes last password coloumn
-
-        html_string += "<h1>Players\n</h1>"
-
-        for x in db_players:
-            html_string += f"<p>{x}\n</p>"
-
-        html_string += "<h1>Matches\n</h1>"
-
-        db_matches = db_retrieve_table_data(conn, "matches")
-
-        for x in db_matches:
-            html_string += f"<p>{x}\n</p>"
-
-        # describe database tables
-        html_string += "<h1>Players Description\n</h1>"
-
-        db_describe_players = db_describe_table(conn, "players")
-        for x in db_describe_players:
-            html_string += f"<p>{x}\n</p>"
-
-        html_string += "<h1>Matches Description\n</h1>"
-
-        db_describe_matches = db_describe_table(conn, "matches")
-        for x in db_describe_matches:
-            html_string += f"<p>{x}\n</p>"
-
-        batch_id = db_latest_batch_id(conn)
-        html_string += f"<p>Latest Batch ID: {batch_id}\n</p>"
-        conn.close()
-
-    # close off returned html string
-    html_string += "</body></html>"
-
-    return html_string
 
 
-
-@app.route("/")
-def home():
-    return redirect("database")
+# @app.route("/")
+# def home():
+#     return redirect("database")
 
 
 

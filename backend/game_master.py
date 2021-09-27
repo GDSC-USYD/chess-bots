@@ -1,12 +1,12 @@
-# Launched by scheduler
+# Chess Game Master functions and classes launched by scheduler
 #
-# 1. (DB) requests all player GDrive links from DB
-# 2. downloads all player models from GDrive link
+# 1. Requests all player GDrive links from DB
+# 2. Downloads all player models from GDrive link
 #   i. checks/handles file error cases and sets flags if invalid
-# 3. creates game schedule where all players verse each other once
-# 4. versus the players/models according to schedule
-#    i. tracks/calculates game data such as num moves, pieces, player scores, num moves
-# 5. (DB) sends game data and player data for this batch into DB
+# 3. Creates game schedule where all players verse each other once
+# 4. Verses the players/models according to schedule
+#    i. tracks/calculates game data such as num moves, pieces, player scores, etc
+# 5. Updates game data and player data for this batch into DB
 
 from db_access import *
 import os
@@ -16,16 +16,8 @@ from datetime import datetime, date
 import chess
 import chess.pgn
 import random
-
-
-# import tensorflow as tf
-# print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-# print("Num CPUs Available: ", len(tf.config.list_physical_devices('CPU')))
-
 from tensorflow import keras
 import numpy
-
-
 
 #### put in own functions file
 
@@ -65,11 +57,8 @@ def download_gdrive_file(id, destination):
         return destination
 
     except requests.exceptions.RequestException as e:
-        print(e)
-
+        #print(e)
         return None
-
-
 
 #### put in own file functions ^^^
 
@@ -94,6 +83,13 @@ class Match:
         else:
             self.winner_id = None
         self.status_flag = status_flag
+        # status flags:
+        # 0 not used
+        # 1 match OK (Has winner)
+        # 2 match TIED (No winner)
+        # -1 match error -> player has status flag -1 (bad model_url)
+        # -2 match error -> player has status flag -2 (bad model)
+        # -3 other error
 
 
     def get_date_time(self):
@@ -103,8 +99,8 @@ class Match:
         now = datetime.now()
         date = now.strftime("%Y-%m-%d")
         time = now.strftime("%H:%M:%S")
-
         return (date, time)
+
 
 
 class Player:
@@ -165,7 +161,7 @@ class ChessGameMaster:
                 self.download_model(player)
             if player.model_path != None: # download succeeded but not loaded
                 # try load model for each player from downloaded file
-                print("loading")
+                #print("loading")
                 self.load_model(player)
 
         return players
@@ -191,8 +187,8 @@ class ChessGameMaster:
         if not os.path.exists('models'):
             os.makedirs('models')
 
-        print("extracting")
-        print(player.model_url)
+        #print("extracting")
+        #print(player.model_url)
         if player.model_url != None:
 
             url_id = self.extract_url_id(player.model_url) #e.g "1vTnYdYU5tJOOYlWVG1ct9Lb9aTTYON1A"
@@ -213,32 +209,13 @@ class ChessGameMaster:
         Sets player status_flag -> 2 (success) | -2 (fail).
         """
         try:
-
-
-
-            print(player.model_path)
-            print(keras.backend.image_data_format())
-
+            #print(player.model_path)
+            #print(keras.backend.image_data_format())
             player.model = keras.models.load_model(player.model_path)
-
-            print(player.model)
-
-
-
-            #player.model = transpose(player.model, [0, 2, 3, 1]) # NCHW -> NHWC
-
-
-#            keras.backend.set_image_data_format("channels_last")
-        #
-        #     player.model.permute(0,2,3,1)
-        #        with tf.compat.v1.variable_scope('yolo_v3_model'):
-        # if self.data_format == 'channels_first':
-        #     inputs = tf.transpose(inputs, [0, 3, 1, 2])
-
-
+            #print(player.model)
             player.status_flag = 2 # set model load error flag
         except Exception as e:
-            print(e)
+            #print(e)
             player.status_flag = -2 # set model load error flag
 
 
@@ -269,8 +246,8 @@ class ChessGameMaster:
         for player in self.players:
             db_upload_message = db_update_player_data(self.conn, player)
             if db_upload_message != "OK":
-                print("Error uploading player.")
-                print(db_upload_message)
+                #print("Error uploading player.")
+                #print(db_upload_message)
                 break
 
         return db_upload_message
@@ -285,8 +262,8 @@ class ChessGameMaster:
         for match in self.matches:
             db_upload_message = db_insert_new_match(self.conn, match)
             if db_upload_message != "OK":
-                print("Error uploading match.")
-                print(db_upload_message)
+                #print("Error uploading match.")
+                #print(db_upload_message)
                 break
 
         return db_upload_message
@@ -309,9 +286,7 @@ class ChessGameMaster:
         """
         Creates a tuple of unique player pairings which gives match schedule of players.
         """
-        print("running")
-#        self.players = [p for p in self.players if p.status_flag > 0]
-
+        #print("running")
         match_schedule_list = []
 
         # create unique pairings of all ready players
@@ -320,7 +295,6 @@ class ChessGameMaster:
         while i < len(self.players):
             for j in range(i + 1, len(self.players)):
                 match_schedule_list.append([self.players[i], self.players[j]])
-
             i += 1
 
         match_schedule_tuple = tuple(match_schedule_list)
@@ -411,7 +385,6 @@ class ChessGameMaster:
             return max_move
 
 
-
         # used for the minimax algorithm
         def minimax_eval(board, player):
             board3d = split_dims(board)
@@ -486,8 +459,6 @@ class ChessGameMaster:
               return min_move
 
 
-
-
         """
         Chess Match
         """
@@ -512,11 +483,9 @@ class ChessGameMaster:
         game.setup(board)
         node = game
 
-        ### START MATCH
+        ### START MATCH ###
         iteration = 0
-
-        minmax_depth = 1 # Set to greater for better search
-
+        minmax_depth = 1
         while True:
             # Player 1 move
             # set random starting point everytime
@@ -529,7 +498,7 @@ class ChessGameMaster:
             board.push(move)
             # save in PGN
             node = node.add_variation(move)
-            print(f'\n{board}')
+            #print(f'\n{board}')
             if board.is_game_over():
                 break
 
@@ -538,16 +507,14 @@ class ChessGameMaster:
             board.push(move)
             # save in PGN
             node = node.add_variation(move)
-            print(f'\n{board}')
+            #print(f'\n{board}')
             if board.is_game_over():
                 break
 
-
         game.headers["Result"] = board.result()
 
-        #print(game)
         ##PGN should be stored here (game)
-        print(game) # pgn
+        #print(game) # pgn
         #print(game, file=open("/content/drive/MyDrive/Chess/pgnMatch.txt", "w"), end="\n\n")
 
 
@@ -575,8 +542,8 @@ class ChessGameMaster:
         player_1.scores.append(player1_score)
         player_2.scores.append(player2_score)
 
-        print(f"Player 1 score: {player1_score}")
-        print(f"Player 2 score: {player2_score}")
+        #print(f"Player 1 score: {player1_score}")
+        #print(f"Player 2 score: {player2_score}")
 
         # create a match object and add it to the matches list!
         self.matches.append(Match(player_1.player_id, player1_score, player_2.player_id, player2_score, game, self.batch_id, winner_id, status_flag))
@@ -596,9 +563,8 @@ class ChessGameMaster:
         """
         After init calls game functions and database functions
         """
-        print("running the games now")
-
-        self.print_players()
+        #print("running the games now")
+        #self.print_players()
 
         for player_1, player_2 in self.match_schedule:
             print(f"Versing {player_1.name} and {player_2.name}")
@@ -625,34 +591,19 @@ class ChessGameMaster:
         for player in self.players:
             self.calculate_elo_score(player)
 
-
         # update database
         db_upload_message = self.update_players_data() #uploads all player object data to db
         if db_upload_message == "OK":
             db_upload_message = self.update_matches_data() #uploads all matches object data to db
 
         # end VM instance
-
-        p_errors = 0
-        for player in self.players:
-            if player.status_flag < 0:
-                p_errors += 1
-        m_errors = 0
-        for match in self.matches:
-            if match.status_flag < 0:
-                m_errors += 1
-
-
-
-        launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))+ " "+ str(p_errors)+ " "+ str(m_errors) + str(db_upload_message)
-
+        launch_status = str(db_upload_message)
 
         return launch_status
 
 
 
 if __name__ == "__main__":
-    print("here")
     from db_connect import *
     from db_access import *
 

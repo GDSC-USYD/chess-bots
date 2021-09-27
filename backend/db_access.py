@@ -7,16 +7,16 @@ import re
 
 
 def db_update_player_data(conn, player):
-    #updates player data in db according to given player object
+    """
+    Updates player data in db according to given -> db connection & player object
+    Called by Chess Game Master after a batch of chess games
 
-    # self.player_id = player_id
-    # self.name = name
-    # self.elo_score = elo_score
-    # self.model_url = model_url
-    # self.status_flag = status_flag # reset to zero every new VM instance?
-    # self.model_path = None
-    # self.scores = []
+    Updates:
+    # player.elo_score
+    # player.status_flag
 
+    Returns -> db_upload_message
+    """
     db_upload_message = "OK"
 
     try:
@@ -24,19 +24,33 @@ def db_update_player_data(conn, player):
 
         return db_upload_message
     except Exception as e:
-        print(e)
+        #print(e)
         db_upload_message = str(e)
         return db_upload_message
-
-    # update_data = (("elo_score", player.elo_score), ("status_flag", player.status_flag))
-    # for var_name, var_value in update_data:
-    #     db_update_coloumn(conn, "players", "player_id", player.player_id, var_name, var_value)
 
 
 
 def db_insert_new_match(conn, match):
-    #inserts new match data in db according to given matche object
+    """
+    Inserts new match data in db according to given -> db connection &  match object
+    Called by Chess Game Master after a batch of chess games
+    Has different routines depending on status flag of match
 
+    Updates:
+    # match.player_1_id
+    # match.player_2_id
+    # match.batch_id
+    # match.date
+    # match.time
+    # match.status_flag
+    # match.winner_id (IF match.status_flag = 1)
+    # match.pgn (IF match.status_flag > 0)
+    # match.player_1_score (IF match.status_flag > 0)
+    # match.player_2_score (IF match.status_flag > 0)
+    # match.player_2_score (IF match.status_flag > 0)
+
+    Returns -> db_upload_message
+    """
     db_upload_message = "OK"
 
     try:
@@ -50,42 +64,41 @@ def db_insert_new_match(conn, match):
 
         return db_upload_message
     except Exception as e:
-        print(e)
+        #print(e)
         db_upload_message = str(e)
         return db_upload_message
 
 
 
 def db_latest_batch_id(conn):
-    # retrieves and returns latest batch_id from db or None if no batches found
-
+    """
+    Retrieves latest batch_id from db or None if no batches found
+    Returns -> batch_id | None
+    """
     db_query = conn.execute(
         f"SELECT MAX(batch_id) FROM matches;"
     ).fetchall()
 
     batch_id = db_query[0][0] # None if no batches found
-    #
-    # if batch_id = db_query[0][0] !=  0:
-    #     print(db_query)
-    #
-    #     print(batch_id)
-    #     return batch_id
-    # else:
+
     return batch_id
 
 
 
 def db_insert_new_player(conn, table_name, name, password, email):
-    # inserts given  into database of given player_id's
-    # returns db_upload_message string -> status of db update
-    status_flag = 0 # just initialised status code
+    """
+    Inserts given player details into database and returns new player_id
+    Returns -> db_upload_message, player_id
+
+    NOTE:
+    status_flag = 0 # just initialised code
+    elo_score = 0 # just initialised score
+    """
     db_upload_message = "OK"
 
     # insert new player into db
     try:
-        #conn.begin()
-        conn.execute(f"INSERT INTO {table_name} (name, elo_score, status_flag, password, email) VALUES ('{name}', 0, {status_flag}, '{password}', '{email}');")
-        #conn.commit()
+        conn.execute(f"INSERT INTO {table_name} (name, elo_score, status_flag, password, email) VALUES ('{name}', 0, 0, '{password}', '{email}');")
 
         # check now in database and retrieve player_id
         db_upload_message, player_id = db_confirm_player_credentials(conn, table_name, name, password)
@@ -94,15 +107,17 @@ def db_insert_new_player(conn, table_name, name, password, email):
 
     except Exception as e:
         player_id = None
-        print(e)
+        #print(e)
         db_upload_message = str(e)
         return db_upload_message, player_id
 
 
 
 def db_confirm_player_credentials(conn, table_name, name, password):
-    # checks given into database of given player_id's
-    # returns db_upload_message string -> status of db update
+    """
+    Checks given player credentials are in database and returns player_id
+    Returns -> db_upload_message, player_id | db_upload_message, None
+    """
     db_check_message = "OK"
 
     db_player_id = conn.execute(
@@ -120,9 +135,10 @@ def db_confirm_player_credentials(conn, table_name, name, password):
 
 
 def db_retrieve_entry_data(conn, table_name, id_name, id_value):
-    # calls db and returns table entry from given table with var_name = var_value
-    # returns tuple -> (id, ...entry data...) or None if not found
-
+    """
+    Calls db and returns table entry from given -> table where given -> var_name = var_value
+    Returns tuple -> (id, ...entry data...) | None (if not found)
+    """
     db_entry = conn.execute(
         f"SELECT * FROM {table_name} WHERE {id_name}='{id_value}';"
     ).fetchall()
@@ -135,10 +151,12 @@ def db_retrieve_entry_data(conn, table_name, id_name, id_value):
 
 
 def db_retrieve_table_list(conn, table_name):
-    # calls db and returns table data converted to list of dictionaries
-    # returns list -> [{... entry data...}, ...]
-
+    """
+    Calls db and returns table data stored as list of dictionaries from given -> table_name
+    Returns -> [{...entry data key value pairs...},...]
+    """
     table_list = []
+
     db_table = db_retrieve_table_data(conn, table_name)
 
     for entry in db_table:
@@ -175,10 +193,12 @@ def db_retrieve_table_list(conn, table_name):
 
 
 def db_retrieve_table_dict(conn, table_name):
-    # calls db and returns table data converted to formatted dictionary
-    # returns dict -> {id:[... entry data...], ...}
-
+    """
+    Calls db and returns table data converted to formatted dictionary from given -> table_name
+    Returns dict -> {id:[... entry data...], ...}
+    """
     table_dict = {}
+
     db_table = db_retrieve_table_data(conn, table_name)
 
     for entry in db_table:
@@ -192,9 +212,10 @@ def db_retrieve_table_dict(conn, table_name):
 
 
 def db_retrieve_table_data(conn, table_name):
-    # calls db and returns table data from given table by table_name
-    # returns tuples -> ((id, ...entry data...),...)
-
+    """
+    Calls db and returns table data stored as tuples from given -> table_name
+    Returns tuples -> ((id, ...entry data...),...)
+    """
     db_table = conn.execute(
         f"SELECT * FROM {table_name};"
     ).fetchall()
@@ -204,9 +225,10 @@ def db_retrieve_table_data(conn, table_name):
 
 
 def db_describe_table(conn, table_name):
-    # calls db and returns table description of given table by table_name
-    # returns tuples -> ((coloumn_var, ...coloum settings...),...)
-
+    """
+    Calls db and returns table description stored as tuples of given -> table_name
+    Returns tuples -> ((coloumn_var, ...coloum settings...),...)
+    """
     db_table_description = conn.execute(
         f"DESCRIBE {table_name};"
     ).fetchall()
@@ -219,11 +241,13 @@ def db_describe_table(conn, table_name):
 
 
 def db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value):
-    # uploads given coloumn (model_url) into database of given player_id
-    # RESETS status_flag to -> 1 (model_url given)
-    # returns db_upload_message string -> status of db update
-    # NOTE: re-coded to for updates to model_url
+    """
+    Uploads given coloumn (model_url) into database of given player_id
+    Returns -> db_upload_message
 
+    NOTE:
+    RESETS status_flag to -> 1 (model_url given code)
+    """
     db_upload_message = "OK"
 
     db_entry = conn.execute(
@@ -237,7 +261,7 @@ def db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value):
             #conn.commit()
             return db_upload_message
         except Exception as e:
-            print(e)
+            #print(e)
             db_upload_message = e
             return db_upload_message
     else: # not found
@@ -247,8 +271,10 @@ def db_update_coloumn(conn, table_name, id_name, id_value, var_name, var_value):
 
 
 def check_valid_email(email):
-    # checks if given email is valid before entering into db
-    # return -> Boolean
+    """
+    Checks if given email is valid format before entering into db
+    Returns -> True | False
+    """
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if re.fullmatch(regex, email):
         return True
