@@ -16,9 +16,11 @@ from datetime import datetime, date
 import chess
 import chess.pgn
 import random
-from tensorflow import keras
+from tensorflow import keras, transpose
+#from keras import backend
 import numpy
 
+keras.backend.set_image_data_format('channels_last')
 
 
 #### put in own functions file
@@ -153,7 +155,7 @@ class ChessGameMaster:
         for player in players:
             #player.status_flag = 0
 
-            if player.status_flag >= 0: # just initialised or reset
+            if player.status_flag >= -10: # just initialised or reset
                 # try download model for each player (even if link hasnt changed)
                 self.download_model(player)
             if player.model_path != None: # download succeeded but not loaded
@@ -206,6 +208,18 @@ class ChessGameMaster:
         """
         try:
             player.model = keras.models.load_model(player.model_path)
+
+
+            #player.model = transpose(player.model, [0, 2, 3, 1]) # NCHW -> NHWC
+
+
+
+            #images_nchw = tf.placeholder(tf.float32, [None, 3, 200, 300])  # input batch
+            #out = tf.transpose(images_nchw, [0, 2, 3, 1])
+            #player.model.permute(0,2,3,1)
+
+
+
             player.status_flag = 2 # set model load error flag
         except Exception as e:
             print(e)
@@ -530,8 +544,7 @@ class ChessGameMaster:
                 try:
                     self.play_chess(player_1, player_2)
                 except Exception as e:
-                    print("Unknown error in playing game.")
-                    return str(e)
+                    print("Unknown error in playing game:", str(e))
                     status_flag = -3 # other error flag
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
 
