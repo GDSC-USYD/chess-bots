@@ -8,7 +8,7 @@ from game_master import *
 
 from flask import Flask, jsonify, make_response, redirect, url_for, request
 from flask_cors import CORS
-#import threading # Cloud Run automatically increases container instances 
+#import threading # Cloud Run automatically increases container instances
 # import os # imported in db_connect
 
 
@@ -471,61 +471,61 @@ def update_entry():
 
 
 # # returns a html string of db contents to display on page + db table descriptions
-# @app.route("/database", methods=["GET"]) # GET
-# def print_db():
-#
-#     # connect to db
-#     db = connect_to_db()
-#
-#     # create returned html string
-#     html_string = "<!DOCTYPE html><html><body>"
-#
-#     # populate html body with database table contents & desciptions
-#     with db.connect() as conn:
-#
-#         # show entries of database tables
-#         db_players = db_retrieve_table_data(conn, "players")
-#         db_players = (x[:-1] for x in db_players) # removes last password coloumn
-#
-#         html_string += "<h1>Players\n</h1>"
-#
-#         for x in db_players:
-#             html_string += f"<p>{x}\n</p>"
-#
-#         html_string += "<h1>Matches\n</h1>"
-#
-#         db_matches = db_retrieve_table_data(conn, "matches")
-#
-#         for x in db_matches:
-#             html_string += f"<p>{x}\n</p>"
-#
-#         # describe database tables
-#         html_string += "<h1>Players Description\n</h1>"
-#
-#         db_describe_players = db_describe_table(conn, "players")
-#         for x in db_describe_players:
-#             html_string += f"<p>{x}\n</p>"
-#
-#         html_string += "<h1>Matches Description\n</h1>"
-#
-#         db_describe_matches = db_describe_table(conn, "matches")
-#         for x in db_describe_matches:
-#             html_string += f"<p>{x}\n</p>"
-#
-#         batch_id = db_latest_batch_id(conn)
-#         html_string += f"<p>Latest Batch ID: {batch_id}\n</p>"
-#         conn.close()
-#
-#     # close off returned html string
-#     html_string += "</body></html>"
-#
-#     return html_string
+ @app.route("/database", methods=["GET"]) # GET
+def print_db():
+
+    # connect to db
+    db = connect_to_db()
+
+    # create returned html string
+    html_string = "<!DOCTYPE html><html><body>"
+
+    # populate html body with database table contents & desciptions
+    with db.connect() as conn:
+
+        # show entries of database tables
+        db_players = db_retrieve_table_data(conn, "players")
+        db_players = (x[:-1] for x in db_players) # removes last password coloumn
+
+        html_string += "<h1>Players\n</h1>"
+
+        for x in db_players:
+            html_string += f"<p>{x}\n</p>"
+
+        html_string += "<h1>Matches\n</h1>"
+
+        db_matches = db_retrieve_table_data(conn, "matches")
+
+        for x in db_matches:
+            html_string += f"<p>{x}\n</p>"
+
+        # describe database tables
+        html_string += "<h1>Players Description\n</h1>"
+
+        db_describe_players = db_describe_table(conn, "players")
+        for x in db_describe_players:
+            html_string += f"<p>{x}\n</p>"
+
+        html_string += "<h1>Matches Description\n</h1>"
+
+        db_describe_matches = db_describe_table(conn, "matches")
+        for x in db_describe_matches:
+            html_string += f"<p>{x}\n</p>"
+
+        batch_id = db_latest_batch_id(conn)
+        html_string += f"<p>Latest Batch ID: {batch_id}\n</p>"
+        conn.close()
+
+    # close off returned html string
+    html_string += "</body></html>"
+
+    return html_string
 
 
 
-# @app.route("/")
-# def home():
-#     return redirect("database")
+@app.route("/")
+def home():
+    return redirect("database")
 
 
 
