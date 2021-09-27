@@ -625,7 +625,6 @@ class ChessGameMaster:
         for player in self.players:
             self.calculate_elo_score(player)
 
-
         # update database
         db_upload_message = self.update_players_data() #uploads all player object data to db
         if db_upload_message == "OK":
@@ -645,7 +644,6 @@ class ChessGameMaster:
 
 
         launch_status = "OK " + str(len(self.players)) + " "+ str(len(self.matches))+ " "+ str(p_errors)+ " "+ str(m_errors) + str(db_upload_message)
-
 
         return launch_status
 

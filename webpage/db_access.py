@@ -25,7 +25,7 @@ def db_update_player_data(conn, player):
         return db_upload_message
     except Exception as e:
         print(e)
-        db_upload_message = str(e)
+        db_upload_message = e
         return db_upload_message
 
     # update_data = (("elo_score", player.elo_score), ("status_flag", player.status_flag))
@@ -51,7 +51,7 @@ def db_insert_new_match(conn, match):
         return db_upload_message
     except Exception as e:
         print(e)
-        db_upload_message = str(e)
+        db_upload_message = e
         return db_upload_message
 
 
@@ -95,7 +95,7 @@ def db_insert_new_player(conn, table_name, name, password, email):
     except Exception as e:
         player_id = None
         print(e)
-        db_upload_message = str(e)
+        db_upload_message = e
         return db_upload_message, player_id
 
 
