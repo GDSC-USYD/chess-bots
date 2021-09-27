@@ -1,0 +1,31 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.button {
+  width: 100%;
+}
+
+.title {
+  color: #707070;
+  padding: 2rem 0;
+  position: absolute;
+  top: 0;
+}
+
+.box {
+  max-width: 80%;
+}

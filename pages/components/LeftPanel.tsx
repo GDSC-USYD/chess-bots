@@ -1,34 +1,64 @@
 import Leaderboard from "./Leaderboard";
+import TopBar from "./TopBar";
+import SearchBar from "./SearchBar";
+import ProfileCard from "./ProfileCard";
+import { User } from "../types/UserTypes";
+import { Game } from "../types/GameTypes";
+import GamesTable from "./GamesTable";
 import styles from "../../styles/left-panel.module.css";
 
-import Box from "@material-ui/core/Box";
+import { useState } from "react";
 
-const LeftPanel = () => {
+import Box from "@material-ui/core/Box";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Typography from "@material-ui/core/Typography";
+
+interface Props {
+  users: User[];
+  games: Game[];
+}
+
+const LeftPanel = ({ users, games }: Props) => {
+  const [selectedUser, setSelectedUser] = useState<User["id"] | null>(null);
+
   return (
     <Box className={styles.panel}>
-      <Leaderboard
-        users={[
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-          { id: 123, mmr: 1000, name: "Asdfsa" },
-        ]}
+      <TopBar />
+      <Leaderboard users={users} />
+      <ExpandMoreIcon
+        style={{ fontSize: "3rem", margin: "1rem 0 5rem", color: "#707070" }}
       />
+      <Typography
+        variant="h3"
+        style={{ paddingBottom: "3rem", color: "#707070" }}
+      >
+        Player and Game Details
+      </Typography>
+      <SearchBar users={users} setSelectedUser={setSelectedUser} />
+      <ProfileCard
+        user={
+          selectedUser ? users.find((u) => u.id === selectedUser) : undefined
+        }
+      />
+      <GamesTable users={users} games={games} selectedUser={selectedUser} />
+      <Box>
+        <Typography
+          variant="h3"
+          style={{ paddingTop: "3rem", color: "#707070" }}
+        >
+          Instructions
+        </Typography>
+        Insert some instructions here
+      </Box>
+      <Box>
+        <Typography
+          variant="h3"
+          style={{ paddingTop: "3rem", color: "#707070" }}
+        >
+          FAQs
+        </Typography>
+        Insert some FAQs here
+      </Box>
     </Box>
   );
 };

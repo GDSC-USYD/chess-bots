@@ -25,7 +25,7 @@ const Leaderboard = ({ users }: Props) => {
       </Toolbar>
 
       <TableContainer className={styles.container}>
-        <Table padding="normal" stickyHeader>
+        <Table padding="normal">
           <TableHead>
             <TableRow>
               <TableCell align="center">Name</TableCell>
@@ -35,12 +35,14 @@ const Leaderboard = ({ users }: Props) => {
 
           <TableBody>
             {users.length ? (
-              users.map((u) => (
-                <TableRow hover key={u.id}>
-                  <TableCell align="center">{u.name}</TableCell>
-                  <TableCell align="center">{u.mmr}</TableCell>
-                </TableRow>
-              ))
+              users
+                .sort((a, b) => b.mmr - a.mmr)
+                .map((u) => (
+                  <TableRow hover key={u.id}>
+                    <TableCell align="center">{u.username}</TableCell>
+                    <TableCell align="center">{u.mmr}</TableCell>
+                  </TableRow>
+                ))
             ) : (
               <TableRow>
                 <TableCell colSpan={2} align="center">
