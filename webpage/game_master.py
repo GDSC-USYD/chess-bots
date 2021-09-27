@@ -226,7 +226,7 @@ class ChessGameMaster:
         url_id = None
 
         x = re.search("/[-\w]{25,}/?", url)
-        print(x)
+        #print(x)
         if x:
             url_id = re.sub('/', '', x[0])
         return url_id
@@ -567,14 +567,14 @@ class ChessGameMaster:
         #self.print_players()
 
         for player_1, player_2 in self.match_schedule:
-            print(f"Versing {player_1.name} and {player_2.name}")
+            #print(f"Versing {player_1.name} and {player_2.name}")
 
             if self.check_status_flags([player_1, player_2]) == "OK":
                 # ready to play game
                 try:
                     self.play_chess(player_1, player_2)
                 except:
-                    print("Unknown error in playing game:", str(e))
+                    #print("Unknown error in playing game:", str(e))
                     status_flag = -3 # other error flag
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
 
@@ -583,7 +583,7 @@ class ChessGameMaster:
                 # collect status flags of players showing an error
                 player_error_flags = [p.status_flag for p in [player_1, player_2] if p.status_flag < 0]
                 if len(player_error_flags) > 0:
-                    print("Error with a player.")
+                    #print("Error with a player.")
                     status_flag = max(player_error_flags) # set match status flag the first occuring of the player errors
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
 
