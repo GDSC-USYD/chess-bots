@@ -471,9 +471,9 @@ def update_entry():
 
 
 # # returns a html string of db contents to display on page + db table descriptions
- @app.route("/database", methods=["GET"]) # GET
+@app.route("/database", methods=["GET"]) # GET
 def print_db():
-    #exposes db 
+    #exposes db
 
     # connect to db
     db = connect_to_db()
