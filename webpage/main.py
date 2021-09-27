@@ -5,7 +5,6 @@ from game_master import *
 #from send_email import * # email function added soon
 
 
-
 from flask import Flask, jsonify, make_response, redirect, url_for, request
 from flask_cors import CORS
 #import threading # Cloud Run automatically increases container instances
