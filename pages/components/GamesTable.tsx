@@ -2,6 +2,7 @@ import { User } from "../types/UserTypes";
 import styles from "../../styles/leaderboard.module.css";
 import { Game } from "../types/GameTypes";
 import { useState } from "react";
+import GameViewer from "./GameViewer";
 
 import Table from "@material-ui/core/Table";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -80,6 +81,7 @@ interface CollapsibleProps {
 
 const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [viewGame, setViewGame] = useState<boolean>(false);
 
   const download = (g: Game) => {
     const blob = new Blob([g.pgn]);
@@ -181,9 +183,10 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
                 <Box className={styles.horizontalflex}>
                   <Button
                     color="primary"
-                    variant="outlined"
+                    variant={viewGame ? "contained" : "outlined"}
                     style={{ marginRight: "1rem" }}
                     disabled={g.status < 0}
+                    onClick={() => setViewGame((viewGame) => !viewGame)}
                   >
                     View this Game
                   </Button>
@@ -198,6 +201,11 @@ const CollapsibleRow = ({ users, g }: CollapsibleProps) => {
                 </Box>
               </Box>
             </Box>
+            {viewGame && (
+              <Box>
+                <GameViewer pgn={g.pgn} />
+              </Box>
+            )}
           </Collapse>
         </TableCell>
       </TableRow>
