@@ -3,7 +3,7 @@ FROM node:14-alpine AS dependencies
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-// add binaries to $PATH
+# add binaries to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
 COPY package.json package-lock.json ./
