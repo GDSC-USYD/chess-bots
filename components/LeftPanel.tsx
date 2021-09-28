@@ -5,7 +5,7 @@ import ProfileCard from "./ProfileCard";
 import { User } from "../types/UserTypes";
 import { Game } from "../types/GameTypes";
 import GamesTable from "./GamesTable";
-import styles from "../../styles/left-panel.module.css";
+import styles from "../styles/left-panel.module.css";
 
 import { useState } from "react";
 

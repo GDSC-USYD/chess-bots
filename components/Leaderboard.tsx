@@ -1,5 +1,5 @@
 import { User } from "../types/UserTypes";
-import styles from "../../styles/leaderboard.module.css";
+import styles from "../styles/leaderboard.module.css";
 
 import Table from "@material-ui/core/Table";
 import TableContainer from "@material-ui/core/TableContainer";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styles from "../../styles/game.module.css";
+import styles from "../styles/game.module.css";
 import kokopu from "kokopu";
 import { Chessboard } from "react-chessboard";
 

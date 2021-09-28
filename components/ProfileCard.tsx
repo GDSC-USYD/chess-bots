@@ -1,4 +1,4 @@
-import styles from "../../styles/profilecard.module.css";
+import styles from "../styles/profilecard.module.css";
 import { User } from "../types/UserTypes";
 import Profile from "./Profile";
 

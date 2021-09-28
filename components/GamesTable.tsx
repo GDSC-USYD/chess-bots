@@ -1,5 +1,5 @@
 import { User } from "../types/UserTypes";
-import styles from "../../styles/leaderboard.module.css";
+import styles from "../styles/leaderboard.module.css";
 import { Game } from "../types/GameTypes";
 import { useState } from "react";
 import GameViewer from "./GameViewer";
