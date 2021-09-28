@@ -1,6 +1,6 @@
-import styles from "../../styles/rightpanel.module.css";
+import styles from "../styles/rightpanel.module.css";
 import React, { useState, useEffect } from "react";
-import { createUser, loginUser } from "../api/routes";
+import { createUser, loginUser } from "../pages/api/routes";
 
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import styles from "../../styles/rightpanel.module.css";
-import { updateModelUrl } from "../api/routes";
+import styles from "../styles/rightpanel.module.css";
+import { updateModelUrl } from "../pages/api/routes";
 import { AlertItem } from "../types/UtilityTypes";
 
 import Typography from "@material-ui/core/Typography";

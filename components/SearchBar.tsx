@@ -1,4 +1,4 @@
-import styles from "../../styles/searchbar.module.css";
+import styles from "../styles/searchbar.module.css";
 import { useState, useRef, useEffect } from "react";
 import { User } from "../types/UserTypes";
 

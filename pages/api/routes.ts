@@ -6,9 +6,9 @@ import {
   ForgotDto,
   LoginDto,
   RegisterDto,
-} from "../types/ApiTypes";
-import { User } from "../types/UserTypes";
-import { Game } from "../types/GameTypes";
+} from "../../types/ApiTypes";
+import { User } from "../../types/UserTypes";
+import { Game } from "../../types/GameTypes";
 
 // Check the fields
 function CheckFields<T>(obj: any, fields: (keyof T)[]): T {

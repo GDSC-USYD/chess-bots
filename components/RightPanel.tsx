@@ -1,4 +1,4 @@
-import styles from "../../styles/rightpanel.module.css";
+import styles from "../styles/rightpanel.module.css";
 import React, { useEffect, useState } from "react";
 import { AlertItem } from "../types/UtilityTypes";
 import Submission from "./Submission";

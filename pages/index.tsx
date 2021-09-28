@@ -2,18 +2,18 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/index.module.css";
-import { User } from "./types/UserTypes";
+import { User } from "../types/UserTypes";
 import { useState, useEffect } from "react";
 import { getGames, getUsers } from "./api/routes";
-import { AlertItem } from "./types/UtilityTypes";
+import { AlertItem } from "../types/UtilityTypes";
 
-import RightPanel from "./components/RightPanel";
-import LeftPanel from "./components/LeftPanel";
+import RightPanel from "../components/RightPanel";
+import LeftPanel from "../components/LeftPanel";
 
 import Box from "@material-ui/core/Box";
 import Alert from "@material-ui/lab/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
-import { Game } from "./types/GameTypes";
+import { Game } from "../types/GameTypes";
 
 const Home: NextPage = () => {
   const [users, setUsers] = useState<User[]>([]);
