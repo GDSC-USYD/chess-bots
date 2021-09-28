@@ -2,6 +2,10 @@
 FROM node:14-alpine AS dependencies
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
+// add binaries to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
 COPY package.json package-lock.json ./
 RUN npm ci --only=production
 
@@ -27,5 +31,7 @@ COPY --from=builder /app/package.json ./package.json
 
 USER nextjs
 EXPOSE 3000
+
+
 
 CMD ["npm", "start"]
