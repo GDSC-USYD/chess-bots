@@ -119,7 +119,7 @@ const Login = ({ setLoggedIn, setAlertMessage, users }: Props) => {
         setAlertMessage({
           color: "success",
           message:
-            "Succesfully registered! Check your email for a confirmation message",
+            "Succesfully registered!",
         });
         setLoggedIn(true);
       } else {
