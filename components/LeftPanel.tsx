@@ -48,7 +48,7 @@ const LeftPanel = ({ users, games }: Props) => {
         >
           Instructions
         </Typography>
-        Register with a Bot/User name, email and password on the right hand side panel. Then submit your Chess Bot model link (shared view link from Google Drive) to enter your bot into the competition!
+        Register with a Bot/User name, email and password on the right hand side panel. Then submit your Chess Bot model (shared viewable link from Google Drive) to enter your bot into the competition!
       </Box>
       <Box>
         <Typography
