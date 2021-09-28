@@ -9,7 +9,7 @@ const TopBar = () => {
     <Box className={styles.topbar}>
       <Image src="/logo.png" width="88" height="71" />
       <Typography variant="h4" className={styles.header}>
-        GDSC USYD's Chess Bots Competition
+        GDSC USYD's Chess Bots Competition!
       </Typography>
     </Box>
   );

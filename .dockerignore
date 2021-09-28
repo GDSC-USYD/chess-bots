@@ -2,4 +2,3 @@ Dockerfile
 README.md
 node_modules
 npm-debug.log
-pages/GameViewer.tsx
