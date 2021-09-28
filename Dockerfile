@@ -3,6 +3,9 @@ FROM node:14-alpine AS dependencies
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# install packages to node_modules
+# npm i
+
 # add binaries to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
 
