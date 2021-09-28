@@ -1,12 +1,12 @@
-# Launched by scheduler
+# Chess Game Master functions and classes launched by scheduler
 #
-# 1. (DB) requests all player GDrive links from DB
-# 2. downloads all player models from GDrive link
+# 1. Requests all player GDrive links from DB
+# 2. Downloads all player models from GDrive link
 #   i. checks/handles file error cases and sets flags if invalid
-# 3. creates game schedule where all players verse each other once
-# 4. versus the players/models according to schedule
-#    i. tracks/calculates game data such as num moves, pieces, player scores, num moves
-# 5. (DB) sends game data and player data for this batch into DB
+# 3. Creates game schedule where all players verse each other once
+# 4. Verses the players/models according to schedule
+#    i. tracks/calculates game data such as num moves, pieces, player scores, etc
+# 5. Updates game data and player data for this batch into DB
 
 from db_access import *
 import os
@@ -18,8 +18,6 @@ import chess.pgn
 import random
 from tensorflow import keras
 import numpy
-
-
 
 #### put in own functions file
 
@@ -59,11 +57,8 @@ def download_gdrive_file(id, destination):
         return destination
 
     except requests.exceptions.RequestException as e:
-        print(e)
-
+        #print(e)
         return None
-
-
 
 #### put in own file functions ^^^
 
@@ -88,6 +83,13 @@ class Match:
         else:
             self.winner_id = None
         self.status_flag = status_flag
+        # status flags:
+        # 0 not used
+        # 1 match OK (Has winner)
+        # 2 match TIED (No winner)
+        # -1 match error -> player has status flag -1 (bad model_url)
+        # -2 match error -> player has status flag -2 (bad model)
+        # -3 other error
 
 
     def get_date_time(self):
@@ -97,8 +99,8 @@ class Match:
         now = datetime.now()
         date = now.strftime("%Y-%m-%d")
         time = now.strftime("%H:%M:%S")
-
         return (date, time)
+
 
 
 class Player:
@@ -112,8 +114,9 @@ class Player:
         self.model_url = model_url
         self.status_flag = status_flag # reset to zero every new VM instance?
         self.model_path = None
-        self.scores = [] #list of their match scores (used to calculate elo)
-        self.model = None # Entire model downloaded and stored
+        self.scores = [] # list of their match scores (used to calculate elo)
+        self.model = None # entire model downloaded and stored
+        self.colour = None # set to "white" or "black" each game
         # status flags:
         # 0 just created (no model link provided)
         # 1 model link added
@@ -153,11 +156,12 @@ class ChessGameMaster:
         for player in players:
             #player.status_flag = 0
 
-            if player.status_flag >= 0: # just initialised or reset
+            if player.status_flag >= -10: # just initialised or reset
                 # try download model for each player (even if link hasnt changed)
                 self.download_model(player)
             if player.model_path != None: # download succeeded but not loaded
                 # try load model for each player from downloaded file
+                #print("loading")
                 self.load_model(player)
 
         return players
@@ -183,8 +187,8 @@ class ChessGameMaster:
         if not os.path.exists('models'):
             os.makedirs('models')
 
-        print("extracting")
-        print(player.model_url)
+        #print("extracting")
+        #print(player.model_url)
         if player.model_url != None:
 
             url_id = self.extract_url_id(player.model_url) #e.g "1vTnYdYU5tJOOYlWVG1ct9Lb9aTTYON1A"
@@ -205,10 +209,13 @@ class ChessGameMaster:
         Sets player status_flag -> 2 (success) | -2 (fail).
         """
         try:
+            #print(player.model_path)
+            #print(keras.backend.image_data_format())
             player.model = keras.models.load_model(player.model_path)
+            #print(player.model)
             player.status_flag = 2 # set model load error flag
         except Exception as e:
-            print(e)
+            #print(e)
             player.status_flag = -2 # set model load error flag
 
 
@@ -219,7 +226,7 @@ class ChessGameMaster:
         url_id = None
 
         x = re.search("/[-\w]{25,}/?", url)
-        print(x)
+        #print(x)
         if x:
             url_id = re.sub('/', '', x[0])
         return url_id
@@ -239,9 +246,11 @@ class ChessGameMaster:
         for player in self.players:
             db_upload_message = db_update_player_data(self.conn, player)
             if db_upload_message != "OK":
-                print("Error uploading player.")
-                print(db_upload_message)
+                #print("Error uploading player.")
+                #print(db_upload_message)
                 break
+
+        return db_upload_message
 
 
     def update_matches_data(self):
@@ -253,9 +262,11 @@ class ChessGameMaster:
         for match in self.matches:
             db_upload_message = db_insert_new_match(self.conn, match)
             if db_upload_message != "OK":
-                print("Error uploading match.")
-                print(db_upload_message)
+                #print("Error uploading match.")
+                #print(db_upload_message)
                 break
+
+        return db_upload_message
 
 
     def get_batch_id(self):
@@ -275,9 +286,7 @@ class ChessGameMaster:
         """
         Creates a tuple of unique player pairings which gives match schedule of players.
         """
-        print("running")
-#        self.players = [p for p in self.players if p.status_flag > 0]
-
+        #print("running")
         match_schedule_list = []
 
         # create unique pairings of all ready players
@@ -286,7 +295,6 @@ class ChessGameMaster:
         while i < len(self.players):
             for j in range(i + 1, len(self.players)):
                 match_schedule_list.append([self.players[i], self.players[j]])
-
             i += 1
 
         match_schedule_tuple = tuple(match_schedule_list)
@@ -360,41 +368,6 @@ class ChessGameMaster:
             return board3d
 
 
-        # Evaluation function used for the minimax algorithm
-        def minimax_eval(board, model):
-            board3d = split_dims(board)
-            board3d = numpy.expand_dims(board3d, 0)
-            return model.predict(board3d)[0][0]
-
-        def minimax(board, depth, alpha, beta, maximizing_player, model):
-            if depth == 0 or board.is_game_over():
-                return minimax_eval(board, model)
-
-            # White player tries to maximize score
-            if maximizing_player:
-                max_eval = -numpy.inf
-                for move in board.legal_moves:
-                    board.push(move)
-                    eval = minimax(board, depth - 1, alpha, beta, False, model)
-                    board.pop()
-                    max_eval = max(max_eval, eval)
-                    alpha = max(alpha, eval)
-                    if beta <= alpha:
-                        break
-                return max_eval
-            else:
-                # Black player tries to minimize score
-                min_eval = numpy.inf
-                for move in board.legal_moves:
-                    board.push(move)
-                    eval = minimax(board, depth - 1, alpha, beta, True, model)
-                    board.pop()
-                    min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
-                    if beta <= alpha:
-                        break
-                return min_eval
-
         # this is the function that gets the move from the neural network
         def get_ai_move(board, depth, model):
             max_move = None
@@ -410,6 +383,80 @@ class ChessGameMaster:
                     max_move = move
 
             return max_move
+
+
+        # used for the minimax algorithm
+        def minimax_eval(board, player):
+            board3d = split_dims(board)
+            board3d = numpy.expand_dims(board3d, 0)
+            #print(model.predict(board3d)[0][0])
+            #if player.colour == "white":
+            return player.model.predict(board3d)[0][0]
+            #elif player.colour == "black":
+              #return 1 - player.model.predict(board3d)[0][0]
+
+
+        def minimax(board, depth, alpha, beta, player, maximising):
+            if depth == 0 or board.is_game_over():
+                return minimax_eval(board, player)
+
+            if maximising == True: # maximizing_player
+                max_eval = -numpy.inf
+                for move in board.legal_moves:
+                    board.push(move)
+                    eval = minimax(board, depth - 1, alpha, beta, player, False)
+                    board.pop()
+                    max_eval = max(max_eval, eval)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
+                return max_eval
+
+            elif maximising == False: # minimising_player
+                min_eval = numpy.inf
+                for move in board.legal_moves:
+                    board.push(move)
+                    eval = minimax(board, depth - 1, alpha, beta, player, True)
+                    board.pop()
+                    min_eval = min(min_eval, eval)
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break
+                return min_eval
+
+
+        # This is the actual function that gets the move from the neural network
+        def get_ai_move(board, depth, player):
+            # White player tries to maximize score
+            if player.colour == "white":
+              max_move = None
+              # set max to -infinity
+              max_eval = -numpy.inf
+
+              for move in board.legal_moves:
+                  board.push(move)
+                  eval = minimax(board, depth - 1, -numpy.inf, numpy.inf, player, maximising=False)
+                  board.pop()
+                  if eval > max_eval:
+                      max_eval = eval
+                      max_move = move
+
+              return max_move
+
+            # Black player tries to minimize score
+            elif player.colour == "black":
+              min_move = None
+              # set min to infinity
+              min_eval = numpy.inf
+
+              for move in board.legal_moves:
+                  board.push(move)
+                  eval = minimax(board, depth - 1, -numpy.inf, numpy.inf, player, maximising=True)
+                  board.pop()
+                  if eval < min_eval:
+                      min_eval = eval
+                      min_move = move
+              return min_move
 
 
         """
@@ -430,42 +477,44 @@ class ChessGameMaster:
         ##Should be changed to players Ids/names
         game.headers["White"] = player_1.name
         game.headers["Black"] = player_2.name
+        player_1.colour = "white"
+        player_2.colour = "black"
 
         game.setup(board)
         node = game
 
-        ###start match
+        ### START MATCH ###
         iteration = 0
+        minmax_depth = 1
         while True:
             # Player 1 move
             # set random starting point everytime
             if iteration == 0:
                 move = random.choice([move for move in board.legal_moves])
             else:
-                move = get_ai_move(board, 1, player_1.model)
+                move = get_ai_move(board, minmax_depth, player_1)
+
             iteration += 1
             board.push(move)
             # save in PGN
             node = node.add_variation(move)
-            print(f'\n{board}')
+            #print(f'\n{board}')
             if board.is_game_over():
                 break
 
             # Player 2 move
-            move = get_ai_move(board, 1, player_2.model)
+            move = get_ai_move(board, minmax_depth, player_2)
             board.push(move)
             # save in PGN
             node = node.add_variation(move)
-            print(f'\n{board}')
+            #print(f'\n{board}')
             if board.is_game_over():
                 break
 
-
         game.headers["Result"] = board.result()
 
-        #print(game)
         ##PGN should be stored here (game)
-        print(game) # pgn
+        #print(game) # pgn
         #print(game, file=open("/content/drive/MyDrive/Chess/pgnMatch.txt", "w"), end="\n\n")
 
 
@@ -493,8 +542,8 @@ class ChessGameMaster:
         player_1.scores.append(player1_score)
         player_2.scores.append(player2_score)
 
-        print(f"Player 1 score: {player1_score}")
-        print(f"Player 2 score: {player2_score}")
+        #print(f"Player 1 score: {player1_score}")
+        #print(f"Player 2 score: {player2_score}")
 
         # create a match object and add it to the matches list!
         self.matches.append(Match(player_1.player_id, player1_score, player_2.player_id, player2_score, game, self.batch_id, winner_id, status_flag))
@@ -514,19 +563,19 @@ class ChessGameMaster:
         """
         After init calls game functions and database functions
         """
-
-        self.print_players()
+        #print("running the games now")
+        #self.print_players()
 
         for player_1, player_2 in self.match_schedule:
-            print(f"Versing {player_1.name} and {player_2.name}")
+            #print(f"Versing {player_1.name} and {player_2.name}")
 
             if self.check_status_flags([player_1, player_2]) == "OK":
                 # ready to play game
                 try:
                     self.play_chess(player_1, player_2)
                 except:
-                    print("Unknown error in playing game.")
-                    status_flag = 3 # other error flag
+                    #print("Unknown error in playing game:", str(e))
+                    status_flag = -3 # other error flag
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
 
             else: # known error with one of the players
@@ -534,26 +583,27 @@ class ChessGameMaster:
                 # collect status flags of players showing an error
                 player_error_flags = [p.status_flag for p in [player_1, player_2] if p.status_flag < 0]
                 if len(player_error_flags) > 0:
-                    print("Error with a player.")
+                    #print("Error with a player.")
                     status_flag = max(player_error_flags) # set match status flag the first occuring of the player errors
                     self.matches.append(Match(player_1.player_id, None, player_2.player_id, None, None, self.batch_id, None, status_flag))
-
-
 
         # finished games
         for player in self.players:
             self.calculate_elo_score(player)
 
         # update database
-        self.update_players_data() #uploads all player object data to db
-        self.update_matches_data() #uploads all matches object data to db
+        db_upload_message = self.update_players_data() #uploads all player object data to db
+        if db_upload_message == "OK":
+            db_upload_message = self.update_matches_data() #uploads all matches object data to db
 
         # end VM instance
-        self.conn.close()
+        launch_status = str(db_upload_message)
+
+        return launch_status
+
 
 
 if __name__ == "__main__":
-    print("here")
     from db_connect import *
     from db_access import *
 
