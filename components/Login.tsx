@@ -1,6 +1,6 @@
 import styles from "../styles/rightpanel.module.css";
 import React, { useState, useEffect } from "react";
-import { createUser, loginUser } from "../pages/api/routes";
+import { createUser, loginUser, forgotPassword } from "../pages/api/routes";
 
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
@@ -118,8 +118,7 @@ const Login = ({ setLoggedIn, setAlertMessage, users }: Props) => {
         localStorage.setItem("token", res);
         setAlertMessage({
           color: "success",
-          message:
-            "Succesfully registered!",
+          message: "Succesfully registered!",
         });
         setLoggedIn(true);
       } else {
@@ -151,14 +150,27 @@ const Login = ({ setLoggedIn, setAlertMessage, users }: Props) => {
       });
 
     if (email.value && username.value) {
-      setEmail({ value: "" });
-      setUsername({ value: "" });
-
-      setAlertMessage({
-        color: "success",
-        message: "Password reset email sent!",
+      const res = await forgotPassword({
+        username: username.value,
+        email: email.value,
       });
-      setScreen(Screen.LOGIN);
+
+      if (res) {
+        setAlertMessage({
+          color: "success",
+          message: "Password reset email sent!",
+        });
+
+        setScreen(Screen.LOGIN);
+        setEmail({ value: "" });
+        setUsername({ value: "" });
+      } else {
+        setAlertMessage({
+          color: "error",
+          message:
+            "Something went wrong (are you sure your details are right?)",
+        });
+      }
     }
   };
 
