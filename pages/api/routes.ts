@@ -1,9 +1,11 @@
-import api from "./api";
+import { api, botapi } from "./api";
 import {
   ApiAuthResponse,
+  ApiBotGameResponse,
   ApiEloResponse,
   ApiGameResponse,
   ForgotDto,
+  GameDto,
   LoginDto,
   RegisterDto,
 } from "../../types/ApiTypes";
@@ -140,5 +142,24 @@ export const updateModelUrl = async (
   } catch (err) {
     console.log(err);
     return false;
+  }
+};
+
+export const processMove = async (game: GameDto): Promise<string | null> => {
+  try {
+    let formData = new FormData();
+
+    formData.append("fen", game.fen);
+    formData.append("bot_player_id", game.id.toString());
+
+    const res = CheckFields<ApiBotGameResponse>(
+      (await botapi.post("/botmove", formData)).data,
+      ["code", "message", "payload"]
+    ).payload;
+
+    return res;
+  } catch (err) {
+    console.log(err);
+    return null;
   }
 };

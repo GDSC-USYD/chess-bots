@@ -13,9 +13,10 @@ import { Button } from "@material-ui/core";
 
 interface Props {
   user: User | undefined;
+  setOpen: (open: boolean) => void;
 }
 
-const ProfileCard = ({ user }: Props) => {
+const ProfileCard = ({ user, setOpen }: Props) => {
   return (
     <Card variant="elevation" className={styles.root}>
       <CardContent>
@@ -39,8 +40,7 @@ const ProfileCard = ({ user }: Props) => {
         )}
       </CardContent>
       <CardActions className={styles.action}>
-        <Button disabled={!user || true}>
-          {/* TODO: Renable when you can play against bots */}
+        <Button disabled={!user} onClick={() => setOpen(true)}>
           Play against this player <ChevronRightIcon />
         </Button>
       </CardActions>

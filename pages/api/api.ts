@@ -5,6 +5,9 @@ const config: AxiosRequestConfig = {
   timeout: 10000,
 };
 
-const api = axios.create(config);
+export const api = axios.create(config);
 
-export default api;
+export const botapi = axios.create({
+  baseURL: "https://chessbots-gamemaster-live-umfn7eaela-ts.a.run.app",
+  timeout: 60000,
+});

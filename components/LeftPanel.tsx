@@ -17,6 +17,8 @@ import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
 import CardActions from "@material-ui/core/CardActions";
 import ArrowRight from "@material-ui/icons/ArrowRight";
+import GamePlayer from "./GamePlayer";
+import { Modal } from "@material-ui/core";
 
 interface Props {
   users: User[];
@@ -25,6 +27,8 @@ interface Props {
 
 const LeftPanel = ({ users, games }: Props) => {
   const [selectedUser, setSelectedUser] = useState<User["id"] | null>(null);
+
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
     <Box className={styles.panel}>
@@ -44,6 +48,7 @@ const LeftPanel = ({ users, games }: Props) => {
         user={
           selectedUser ? users.find((u) => u.id === selectedUser) : undefined
         }
+        setOpen={setOpen}
       />
       <GamesTable users={users} games={games} selectedUser={selectedUser} />
       <Container className={styles.instructions} style={{ maxWidth: "40%" }}>
@@ -99,6 +104,20 @@ const LeftPanel = ({ users, games }: Props) => {
         </Typography>
         We'll put your FAQs here :)
       </Box>
+      <Modal
+        open={open && selectedUser !== null}
+        onClose={(e, reason) => {
+          if (reason !== "backdropClick") setOpen(false);
+        }}
+      >
+        <GamePlayer
+          botId={
+            selectedUser
+              ? users.find((u) => u.id === selectedUser)?.id
+              : undefined
+          }
+        />
+      </Modal>
     </Box>
   );
 };

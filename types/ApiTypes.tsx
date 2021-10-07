@@ -31,6 +31,8 @@ export type ApiGameResponse = ApiBaseResponse & { payload: GameGetDto[] };
 
 export type ApiAuthResponse = ApiBaseResponse & { payload: string };
 
+export type ApiBotGameResponse = ApiBaseResponse & { payload: string };
+
 export type RegisterDto = {
   username: string;
   email: string;
@@ -45,4 +47,9 @@ export type LoginDto = {
 export type ForgotDto = {
   username: string;
   email: string;
+};
+
+export type GameDto = {
+  fen: string;
+  id: number;
 };
